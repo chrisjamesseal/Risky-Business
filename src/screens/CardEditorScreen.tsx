@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   CARD_LOCATIONS,
   CATEGORIES,
@@ -251,6 +251,17 @@ function CardForm({
   const set = <K extends keyof Draft>(key: K, v: Draft[K]) =>
     setValue((prev) => ({ ...prev, [key]: v }));
 
+  // Grow the description box to fit its text so the whole prompt is visible.
+  const descRef = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = descRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    // scrollHeight excludes borders; add them back (border-box sizing).
+    const borders = el.offsetHeight - el.clientHeight;
+    el.style.height = `${el.scrollHeight + borders}px`;
+  }, [value.description]);
+
   // A card to render in the live preview — fall back to placeholders while empty.
   const preview: Card = {
     id: value.id ?? "preview",
@@ -296,10 +307,13 @@ function CardForm({
         <label htmlFor="desc">Description</label>
         <textarea
           id="desc"
+          ref={descRef}
+          className="textarea--grow"
           value={value.description}
           maxLength={240}
           onChange={(e) => set("description", e.target.value)}
         />
+        <span className="field__count">{value.description.length}/240</span>
       </div>
 
       <div className="field">

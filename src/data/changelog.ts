@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.3.0";
+export const APP_VERSION = "1.3.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,13 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.3.1",
+    title: "Editor tweaks",
+    changes: [
+      "The description box now grows to fit the whole prompt while you edit, with a character count",
+    ],
+  },
   {
     version: "1.3.0",
     title: "Group Rounds",

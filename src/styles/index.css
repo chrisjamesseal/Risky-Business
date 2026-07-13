@@ -252,6 +252,21 @@ textarea {
   min-height: 72px;
 }
 
+/* Auto-grows to fit its content so the full prompt stays visible. */
+.textarea--grow {
+  resize: none;
+  overflow: hidden;
+  min-height: 96px;
+  line-height: 1.5;
+}
+
+.field__count {
+  align-self: flex-end;
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 1px;
+}
+
 input:focus,
 textarea:focus,
 select:focus {
