@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.4.0";
+export const APP_VERSION = "1.5.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.5.0",
+    title: "Ongoing tasks & tidy-up",
+    changes: [
+      "New Ongoing category: start a task (e.g. keep an accent), then the group checks 'did you keep it up?' at your next turn and you score",
+      "Removed Chaos Events — they relied on effects the game doesn't handle yet",
+      "Every category now has a short description in the editor and How to Play",
+      "Editor list is cleaner: card emoji removed to make room for the text",
+    ],
+  },
   {
     version: "1.4.0",
     title: "Double points fixes",

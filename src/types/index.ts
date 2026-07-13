@@ -5,28 +5,38 @@ export const CATEGORIES = [
   "Dare",
   "Challenge",
   "Mini Game",
+  "Ongoing",
   "Group Round",
-  "Chaos Event",
 ] as const;
 export type Category = (typeof CATEGORIES)[number];
 
 /**
- * Categories that award points and count as a scoring turn. Group Rounds and
- * Chaos Events are non-scoring interludes — everyone joins in, nobody scores.
+ * Categories that award points and count as a scoring turn. Group Rounds are
+ * non-scoring interludes — everyone joins in, nobody scores.
+ *
+ * Ongoing cards score too, but their points are deferred: the player starts
+ * the task now and the group checks whether they kept it up at the player's
+ * next turn.
  */
 export const SCORING_CATEGORIES = [
   "Truth",
   "Dare",
   "Challenge",
   "Mini Game",
+  "Ongoing",
 ] as const;
 export type ScoringCategory = (typeof SCORING_CATEGORIES)[number];
 
 /** Non-scoring interlude categories, shown between scoring turns. */
-export const INTERLUDE_CATEGORIES = ["Group Round", "Chaos Event"] as const;
+export const INTERLUDE_CATEGORIES = ["Group Round"] as const;
 
 export function isScoringCategory(category: Category): boolean {
   return (SCORING_CATEGORIES as readonly string[]).includes(category);
+}
+
+/** Ongoing tasks are accepted now and scored at the player's next turn. */
+export function isOngoingCategory(category: Category): boolean {
+  return category === "Ongoing";
 }
 
 export const DIFFICULTIES = ["Easy", "Medium", "Hard", "Extreme"] as const;
@@ -47,11 +57,12 @@ export interface Card {
   difficulty: Difficulty;
   location: CardLocation;
   enabled: boolean;
-  /**
-   * Interlude effect: when this card is shown, the scoring card that follows it
-   * this turn is worth double points. Used by the "Double Trouble" chaos card.
-   */
-  doublesNext?: boolean;
+}
+
+/** An accepted Ongoing task awaiting its check-in at the player's next turn. */
+export interface PendingMission {
+  title: string;
+  points: number;
 }
 
 export interface Player {
@@ -64,6 +75,8 @@ export interface Player {
   doublePointsUsed: boolean;
   /** True once Double Points is armed for the upcoming scoring card. */
   doublePointsArmed: boolean;
+  /** An Ongoing task to be checked at this player's next turn, if any. */
+  pendingMission: PendingMission | null;
 }
 
 export interface Settings {

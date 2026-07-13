@@ -29,8 +29,9 @@ export function GameScreen({
   const everyoneDoneAfterThis = state.players.every(
     (p) => p.scoringTurnsCompleted >= SCORING_TURNS_PER_PLAYER,
   );
-  const doubled = player.doublePointsArmed || state.chaosDoubled;
+  const doubled = player.doublePointsArmed;
   const stake = state.currentCard ? cardPoints(state.currentCard, doubled) : 0;
+  const isOngoing = state.currentCard?.category === "Ongoing";
 
   const quit = () => {
     if (window.confirm("Quit the game? All scores will be lost.")) onQuit();
@@ -124,7 +125,30 @@ export function GameScreen({
           </div>
         )}
 
-        {state.phase === "card" && state.currentCard && (
+        {state.phase === "card" && state.currentCard && isOngoing && (
+          <div className="stack">
+            <GameCard card={state.currentCard} doubled={doubled} />
+            <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
+              Keep it up until your next turn — the group checks then for +{stake}.
+            </p>
+            <div className="btn-row">
+              <Button
+                variant="warn"
+                onClick={() => dispatch({ type: "START_MISSION" })}
+              >
+                ▶ Start Task
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => dispatch({ type: "FAIL" })}
+              >
+                ✗ Skip · 0
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {state.phase === "card" && state.currentCard && !isOngoing && (
           <div className="stack">
             <GameCard card={state.currentCard} doubled={doubled} />
             <div className="btn-row">
@@ -144,25 +168,69 @@ export function GameScreen({
           </div>
         )}
 
-        {state.phase === "result" && (
-          <div className="stack">
-            <div className="award">
-              <div
-                className={
-                  "award__value" +
-                  (state.lastAward === 0 ? " award__value--zero" : "")
+        {state.phase === "checkin" && player.pendingMission && (
+          <div className="stack" style={{ textAlign: "center" }}>
+            <div className="handoff__icon">⏳</div>
+            <p className="handoff__label">Task check for</p>
+            <p className="handoff__name">{player.name}</p>
+            <p style={{ fontSize: 17, lineHeight: 1.4 }}>
+              Did they keep up{" "}
+              <span style={{ color: "var(--orange)" }}>
+                “{player.pendingMission.title}”
+              </span>
+              ?
+            </p>
+            <div className="btn-row">
+              <Button
+                variant="success"
+                onClick={() =>
+                  dispatch({ type: "RESOLVE_MISSION", success: true })
                 }
               >
-                {state.lastAward === 0 ? "0" : `+${state.lastAward}`}
-              </div>
-              <div className="award__label">
-                {state.lastAward === 0
-                  ? "No points"
-                  : state.lastDoubled
-                    ? "Double points!"
-                    : "Points awarded"}
-              </div>
+                ✓ Yes +{player.pendingMission.points}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() =>
+                  dispatch({ type: "RESOLVE_MISSION", success: false })
+                }
+              >
+                ✗ No · 0
+              </Button>
             </div>
+          </div>
+        )}
+
+        {state.phase === "result" && (
+          <div className="stack">
+            {state.lastMissionStarted ? (
+              <div className="award">
+                <div className="award__value" style={{ color: "var(--orange)" }}>
+                  ⏳
+                </div>
+                <div className="award__label">
+                  Task started — checked at your next turn
+                </div>
+              </div>
+            ) : (
+              <div className="award">
+                <div
+                  className={
+                    "award__value" +
+                    (state.lastAward === 0 ? " award__value--zero" : "")
+                  }
+                >
+                  {state.lastAward === 0 ? "0" : `+${state.lastAward}`}
+                </div>
+                <div className="award__label">
+                  {state.lastAward === 0
+                    ? "No points"
+                    : state.lastDoubled
+                      ? "Double points!"
+                      : "Points awarded"}
+                </div>
+              </div>
+            )}
             <Button
               variant="primary"
               large

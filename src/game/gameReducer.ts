@@ -7,7 +7,7 @@ import {
 import { buildDeck } from "./deckBuilder";
 import { cardPoints } from "./scoring";
 
-export type TurnPhase = "ready" | "interlude" | "card" | "result";
+export type TurnPhase = "ready" | "interlude" | "card" | "result" | "checkin";
 
 export interface GameState {
   players: Player[];
@@ -18,13 +18,13 @@ export interface GameState {
   interludeQueue: Card[];
   phase: TurnPhase;
   currentCard: Card | null;
-  /** A non-scoring Group Round or Chaos Event to show before the scoring card. */
+  /** A non-scoring Group Round to show before the scoring card. */
   pendingInterlude: Card | null;
-  /** True when a "Double Trouble" interlude has doubled this turn's card. */
-  chaosDoubled: boolean;
   /** Points awarded on the most recent resolution (for the result screen). */
   lastAward: number | null;
   lastDoubled: boolean;
+  /** True when the last resolution started an Ongoing task (deferred points). */
+  lastMissionStarted: boolean;
   finished: boolean;
 }
 
@@ -49,6 +49,7 @@ export function createGame(config: NewGameConfig): GameState {
     swapUsed: false,
     doublePointsUsed: false,
     doublePointsArmed: false,
+    pendingMission: null,
   }));
 
   const scoringNeeded = players.length * SCORING_TURNS_PER_PLAYER;
@@ -71,9 +72,9 @@ export function createGame(config: NewGameConfig): GameState {
     phase: "ready",
     currentCard: null,
     pendingInterlude: null,
-    chaosDoubled: false,
     lastAward: null,
     lastDoubled: false,
+    lastMissionStarted: false,
     finished: false,
   };
 }
@@ -85,6 +86,8 @@ export type GameAction =
   | { type: "SWAP" }
   | { type: "COMPLETE" }
   | { type: "FAIL" }
+  | { type: "START_MISSION" }
+  | { type: "RESOLVE_MISSION"; success: boolean }
   | { type: "NEXT" };
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -103,6 +106,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return resolve(state, true);
     case "FAIL":
       return resolve(state, false);
+    case "START_MISSION":
+      return startMission(state);
+    case "RESOLVE_MISSION":
+      return resolveMission(state, action.success);
     case "NEXT":
       return next(state);
     default:
@@ -147,7 +154,6 @@ function reveal(state: GameState, roll: number): GameState {
       interludeQueue: restInterludes,
       currentCard: card,
       pendingInterlude: interlude,
-      chaosDoubled: interlude.doublesNext === true,
       phase: "interlude",
     };
   }
@@ -155,7 +161,6 @@ function reveal(state: GameState, roll: number): GameState {
     ...state,
     scoringQueue: restScoring,
     currentCard: card,
-    chaosDoubled: false,
     phase: "card",
   };
 }
@@ -178,8 +183,7 @@ function swap(state: GameState): GameState {
 function resolve(state: GameState, completed: boolean): GameState {
   if (state.phase !== "card" || !state.currentCard) return state;
   const player = state.players[state.currentPlayerIndex];
-  // Doubled by the player's lifeline OR a Double Trouble chaos card this turn.
-  const doubled = player.doublePointsArmed || state.chaosDoubled;
+  const doubled = player.doublePointsArmed;
   const award = completed ? cardPoints(state.currentCard, doubled) : 0;
 
   return {
@@ -189,26 +193,90 @@ function resolve(state: GameState, completed: boolean): GameState {
       score: p.score + award,
       scoringTurnsCompleted: p.scoringTurnsCompleted + 1,
       doublePointsArmed: false,
-      // Only the lifeline is consumed; the chaos effect is free.
-      doublePointsUsed: p.doublePointsUsed || player.doublePointsArmed,
+      // Arming is consumed whether the card is completed or failed.
+      doublePointsUsed: p.doublePointsUsed || doubled,
     })),
     lastAward: award,
     lastDoubled: doubled,
+    lastMissionStarted: false,
     phase: "result",
   };
 }
 
+/**
+ * Accept an Ongoing task. It counts as this scoring turn now; the points are
+ * held and awarded (or not) at the player's next turn check-in.
+ */
+function startMission(state: GameState): GameState {
+  if (state.phase !== "card" || !state.currentCard) return state;
+  if (state.currentCard.category !== "Ongoing") return state;
+  const player = state.players[state.currentPlayerIndex];
+  const doubled = player.doublePointsArmed;
+  const points = cardPoints(state.currentCard, doubled);
+  const title = state.currentCard.title;
+
+  return {
+    ...state,
+    players: updateCurrentPlayer(state, (p) => ({
+      ...p,
+      scoringTurnsCompleted: p.scoringTurnsCompleted + 1,
+      pendingMission: { title, points },
+      doublePointsArmed: false,
+      doublePointsUsed: p.doublePointsUsed || doubled,
+    })),
+    lastAward: null,
+    lastDoubled: doubled,
+    lastMissionStarted: true,
+    phase: "result",
+  };
+}
+
+/** Check-in on a pending Ongoing task, then continue play. */
+function resolveMission(state: GameState, success: boolean): GameState {
+  if (state.phase !== "checkin") return state;
+  const player = state.players[state.currentPlayerIndex];
+  const mission = player.pendingMission;
+  if (!mission) return state;
+  const award = success ? mission.points : 0;
+
+  const players = state.players.map((p, i) =>
+    i === state.currentPlayerIndex
+      ? { ...p, score: p.score + award, pendingMission: null }
+      : p,
+  );
+  const resolved: GameState = { ...state, players };
+
+  // Mid-game check-in: the player still has a turn to play, so hand it to them.
+  const stillHasTurns =
+    players[state.currentPlayerIndex].scoringTurnsCompleted <
+    SCORING_TURNS_PER_PLAYER;
+  if (stillHasTurns) {
+    return {
+      ...resolved,
+      currentCard: null,
+      pendingInterlude: null,
+      lastAward: null,
+      lastDoubled: false,
+      lastMissionStarted: false,
+      phase: "ready",
+    };
+  }
+  // End-of-game check-in: settle the next pending mission or finish.
+  return settleOrFinish(resolved);
+}
+
 function next(state: GameState): GameState {
   if (state.phase !== "result") return state;
+  return advance(state);
+}
 
+/** Move play to the next player, routing through a check-in if one is due. */
+function advance(state: GameState): GameState {
   const everyoneDone = state.players.every(
     (p) => p.scoringTurnsCompleted >= SCORING_TURNS_PER_PLAYER,
   );
-  if (everyoneDone) {
-    return { ...state, finished: true, currentCard: null, phase: "ready" };
-  }
+  if (everyoneDone) return settleOrFinish(state);
 
-  // Advance to the next player who still has scoring turns remaining.
   let idx = state.currentPlayerIndex;
   for (let i = 0; i < state.players.length; i++) {
     idx = (idx + 1) % state.players.length;
@@ -217,14 +285,38 @@ function next(state: GameState): GameState {
     }
   }
 
-  return {
+  const cleared: GameState = {
     ...state,
     currentPlayerIndex: idx,
     currentCard: null,
     pendingInterlude: null,
-    chaosDoubled: false,
     lastAward: null,
     lastDoubled: false,
-    phase: "ready",
+    lastMissionStarted: false,
   };
+  // A pending Ongoing task from this player's last turn is checked first.
+  return {
+    ...cleared,
+    phase: state.players[idx].pendingMission ? "checkin" : "ready",
+  };
+}
+
+/**
+ * When everyone has taken their turns, resolve any still-pending Ongoing tasks
+ * one at a time before ending the game.
+ */
+function settleOrFinish(state: GameState): GameState {
+  const pendingIdx = state.players.findIndex((p) => p.pendingMission);
+  if (pendingIdx >= 0) {
+    return {
+      ...state,
+      currentPlayerIndex: pendingIdx,
+      currentCard: null,
+      pendingInterlude: null,
+      lastAward: null,
+      lastMissionStarted: false,
+      phase: "checkin",
+    };
+  }
+  return { ...state, finished: true, currentCard: null, phase: "ready" };
 }

@@ -71,7 +71,6 @@ function sanitizeCard(value: unknown): Card | null {
     difficulty: v.difficulty,
     location: v.location,
     enabled: v.enabled !== false,
-    ...(v.doublesNext === true ? { doublesNext: true } : {}),
   };
 }
 
