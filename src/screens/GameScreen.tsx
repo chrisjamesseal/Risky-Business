@@ -32,6 +32,7 @@ export function GameScreen({
   const doubled = player.doublePointsArmed;
   const stake = state.currentCard ? cardPoints(state.currentCard, doubled) : 0;
   const isOngoing = state.currentCard?.category === "Ongoing";
+  const isMini = state.currentCard?.category === "Mini Game";
 
   const quit = () => {
     if (window.confirm("Quit the game? All scores will be lost.")) onQuit();
@@ -148,7 +149,36 @@ export function GameScreen({
           </div>
         )}
 
-        {state.phase === "card" && state.currentCard && !isOngoing && (
+        {state.phase === "card" && state.currentCard && isMini && (
+          <div className="stack">
+            <GameCard card={state.currentCard} doubled={doubled} />
+            <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
+              Everyone plays — then tap who won for +{stake}.
+            </p>
+            <div className="winner-grid">
+              {state.players.map((p) => (
+                <button
+                  key={p.id}
+                  className="chip chip--active"
+                  onClick={() =>
+                    dispatch({ type: "AWARD_MINI", winnerId: p.id })
+                  }
+                >
+                  🏆 {p.name}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="danger"
+              block
+              onClick={() => dispatch({ type: "AWARD_MINI", winnerId: null })}
+            >
+              ✗ No winner · 0
+            </Button>
+          </div>
+        )}
+
+        {state.phase === "card" && state.currentCard && !isOngoing && !isMini && (
           <div className="stack">
             <GameCard card={state.currentCard} doubled={doubled} />
             <div className="btn-row">
@@ -223,11 +253,13 @@ export function GameScreen({
                   {state.lastAward === 0 ? "0" : `+${state.lastAward}`}
                 </div>
                 <div className="award__label">
-                  {state.lastAward === 0
-                    ? "No points"
-                    : state.lastDoubled
-                      ? "Double points!"
-                      : "Points awarded"}
+                  {state.lastWinnerName
+                    ? `🏆 ${state.lastWinnerName} won!`
+                    : state.lastAward === 0
+                      ? "No points"
+                      : state.lastDoubled
+                        ? "Double points!"
+                        : "Points awarded"}
                 </div>
               </div>
             )}

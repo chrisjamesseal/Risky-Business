@@ -56,7 +56,6 @@ export interface Card {
   category: Category;
   difficulty: Difficulty;
   location: CardLocation;
-  enabled: boolean;
 }
 
 /** An accepted Ongoing task awaiting its check-in at the player's next turn. */
@@ -77,10 +76,6 @@ export interface Player {
   doublePointsArmed: boolean;
   /** An Ongoing task to be checked at this player's next turn, if any. */
   pendingMission: PendingMission | null;
-}
-
-export interface Settings {
-  drinkModeDefault: boolean;
 }
 
 /** Points awarded per difficulty. */

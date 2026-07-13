@@ -4,13 +4,9 @@ import {
   CATEGORIES,
   DIFFICULTIES,
   type Card,
-  type Settings,
 } from "../types";
 
 const CARDS_KEY = "riskit.cards.v1";
-const SETTINGS_KEY = "riskit.settings.v1";
-
-const DEFAULT_SETTINGS: Settings = { drinkModeDefault: false };
 
 function safeParse<T>(raw: string | null): T | null {
   if (!raw) return null;
@@ -70,7 +66,6 @@ function sanitizeCard(value: unknown): Card | null {
     category: v.category,
     difficulty: v.difficulty,
     location: v.location,
-    enabled: v.enabled !== false,
   };
 }
 
@@ -79,22 +74,6 @@ function isOneOf<T extends readonly string[]>(
   allowed: T,
 ): value is T[number] {
   return typeof value === "string" && (allowed as readonly string[]).includes(value);
-}
-
-// ---------------------------------------------------------------- Settings
-
-export function loadSettings(): Settings {
-  const stored = safeParse<Partial<Settings>>(localStorage.getItem(SETTINGS_KEY));
-  return {
-    drinkModeDefault:
-      typeof stored?.drinkModeDefault === "boolean"
-        ? stored.drinkModeDefault
-        : DEFAULT_SETTINGS.drinkModeDefault,
-  };
-}
-
-export function saveSettings(settings: Settings): void {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
 
 // ---------------------------------------------------------------- Ids

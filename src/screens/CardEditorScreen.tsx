@@ -26,18 +26,45 @@ function blankDraft(category: Category): Draft {
     category,
     difficulty: "Easy",
     location: "All",
-    enabled: true,
   };
+}
+
+/** A single-select row of tappable options (used instead of dropdowns). */
+function ChipSelect<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: readonly T[];
+  value: T;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="chip-row">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          className={"chip" + (value === opt ? " chip--active" : "")}
+          onClick={() => onChange(opt)}
+          aria-pressed={value === opt}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 export function CardEditorScreen({
   cards,
   onChange,
+  onReset,
   onBack,
   onToast,
 }: {
   cards: Card[];
   onChange: (cards: Card[]) => void;
+  onReset: () => void;
   onBack: () => void;
   onToast: (message: string, error?: boolean) => void;
 }) {
@@ -72,27 +99,6 @@ export function CardEditorScreen({
     onChange(cards.filter((c) => c.id !== id));
     setDraft(null);
     onToast("Card deleted");
-  };
-
-  const duplicate = (card: Draft) => {
-    if (!card.id) return;
-    const copy: Card = {
-      ...(card as Card),
-      id: makeId(),
-      title: `${card.title} (copy)`,
-    };
-    const index = cards.findIndex((c) => c.id === card.id);
-    const next = cards.slice();
-    next.splice(index + 1, 0, copy);
-    onChange(next);
-    setDraft(null);
-    onToast("Card duplicated");
-  };
-
-  const toggleEnabled = (id: string) => {
-    onChange(
-      cards.map((c) => (c.id === id ? { ...c, enabled: !c.enabled } : c)),
-    );
   };
 
   const exportCards = () => {
@@ -130,7 +136,6 @@ export function CardEditorScreen({
         onSave={upsert}
         onCancel={() => setDraft(null)}
         onDelete={draft.id ? () => remove(draft.id!) : undefined}
-        onDuplicate={draft.id ? () => duplicate(draft) : undefined}
       />
     );
   }
@@ -167,44 +172,27 @@ export function CardEditorScreen({
       <div className="stack--sm">
         {visible.length === 0 && <p className="muted">No {filter} cards yet.</p>}
         {visible.map((card) => (
-          <div
+          <button
             key={card.id}
-            className={
-              "editor-item" + (card.enabled ? "" : " editor-item--off")
-            }
+            className="editor-item__main"
+            onClick={() => setDraft(card)}
           >
-            <button
-              className="editor-item__main"
-              onClick={() => setDraft(card)}
-            >
-              <span className="editor-item__body">
-                <span className="editor-item__titlerow">
-                  <span className="editor-item__title">{card.title}</span>
-                  <span className="editor-item__edit">✎ Edit</span>
-                </span>
-                <span className="editor-item__desc">{card.description}</span>
-                <span className="editor-item__meta">
-                  {isScoringCategory(card.category) ? (
-                    <DifficultyBadge difficulty={card.difficulty} />
-                  ) : (
-                    <span className="editor-item__nopts">No points</span>
-                  )}
-                  <span className="editor-item__loc">{card.location}</span>
-                </span>
+            <span className="editor-item__body">
+              <span className="editor-item__titlerow">
+                <span className="editor-item__title">{card.title}</span>
+                <span className="editor-item__edit">✎ Edit</span>
               </span>
-            </button>
-            <button
-              className={
-                "editor-item__toggle editor-item__toggle--" +
-                (card.enabled ? "on" : "off")
-              }
-              onClick={() => toggleEnabled(card.id)}
-              aria-pressed={card.enabled}
-              title={card.enabled ? "Enabled — tap to disable" : "Disabled — tap to enable"}
-            >
-              {card.enabled ? "ON" : "OFF"}
-            </button>
-          </div>
+              <span className="editor-item__desc">{card.description}</span>
+              <span className="editor-item__meta">
+                {isScoringCategory(card.category) ? (
+                  <DifficultyBadge difficulty={card.difficulty} />
+                ) : (
+                  <span className="editor-item__nopts">No points</span>
+                )}
+                <span className="editor-item__loc">{card.location}</span>
+              </span>
+            </span>
+          </button>
         ))}
       </div>
 
@@ -218,6 +206,9 @@ export function CardEditorScreen({
           ⇧ Import
         </Button>
       </div>
+      <Button variant="danger" block onClick={onReset}>
+        ↺ Reset Cards to Default
+      </Button>
       <input
         ref={fileInput}
         type="file"
@@ -238,13 +229,11 @@ function CardForm({
   onSave,
   onCancel,
   onDelete,
-  onDuplicate,
 }: {
   draft: Draft;
   onSave: (draft: Draft) => void;
   onCancel: () => void;
   onDelete?: () => void;
-  onDuplicate?: () => void;
 }) {
   const [value, setValue] = useState<Draft>(draft);
   const set = <K extends keyof Draft>(key: K, v: Draft[K]) =>
@@ -256,12 +245,10 @@ function CardForm({
     const el = descRef.current;
     if (!el) return;
     el.style.height = "auto";
-    // scrollHeight excludes borders; add them back (border-box sizing).
     const borders = el.offsetHeight - el.clientHeight;
     el.style.height = `${el.scrollHeight + borders}px`;
   }, [value.description]);
 
-  // A card to render in the live preview — fall back to placeholders while empty.
   const preview: Card = {
     id: value.id ?? "preview",
     title: value.title.trim() || "Card title",
@@ -269,7 +256,6 @@ function CardForm({
     category: value.category,
     difficulty: value.difficulty,
     location: value.location,
-    enabled: value.enabled,
   };
 
   const confirmDelete = () => {
@@ -316,37 +302,23 @@ function CardForm({
       </div>
 
       <div className="field">
-        <label htmlFor="cat">Category</label>
-        <select
-          id="cat"
+        <label>Category</label>
+        <ChipSelect
+          options={CATEGORIES}
           value={value.category}
-          onChange={(e) => set("category", e.target.value as Category)}
-        >
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          onChange={(c) => set("category", c)}
+        />
         <span className="field__hint">{CATEGORY_DESCRIPTION[value.category]}</span>
       </div>
 
       {isScoringCategory(value.category) ? (
         <div className="field">
-          <label htmlFor="diff">Difficulty</label>
-          <select
-            id="diff"
+          <label>Difficulty</label>
+          <ChipSelect
+            options={DIFFICULTIES}
             value={value.difficulty}
-            onChange={(e) =>
-              set("difficulty", e.target.value as Draft["difficulty"])
-            }
-          >
-            {DIFFICULTIES.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+            onChange={(d) => set("difficulty", d)}
+          />
         </div>
       ) : (
         <p className="muted" style={{ fontSize: 12 }}>
@@ -355,46 +327,18 @@ function CardForm({
       )}
 
       <div className="field">
-        <label htmlFor="loc">Location</label>
-        <select
-          id="loc"
+        <label>Location</label>
+        <ChipSelect
+          options={CARD_LOCATIONS}
           value={value.location}
-          onChange={(e) => set("location", e.target.value as Draft["location"])}
-        >
-          {CARD_LOCATIONS.map((l) => (
-            <option key={l} value={l}>
-              {l}
-            </option>
-          ))}
-        </select>
+          onChange={(l) => set("location", l)}
+        />
       </div>
 
-      <button
-        className="toggle"
-        onClick={() => set("enabled", !value.enabled)}
-        aria-pressed={value.enabled}
-      >
-        <span>Enabled in games</span>
-        <span
-          className={`toggle__state toggle__state--${value.enabled ? "on" : "off"}`}
-        >
-          {value.enabled ? "ON" : "OFF"}
-        </span>
-      </button>
-
-      {(onDuplicate || onDelete) && (
-        <div className="btn-row">
-          {onDuplicate && (
-            <Button variant="secondary" onClick={onDuplicate}>
-              ⧉ Duplicate
-            </Button>
-          )}
-          {onDelete && (
-            <Button variant="danger" onClick={confirmDelete}>
-              🗑 Delete
-            </Button>
-          )}
-        </div>
+      {onDelete && (
+        <Button variant="danger" onClick={confirmDelete}>
+          🗑 Delete
+        </Button>
       )}
 
       <div className="spacer" />

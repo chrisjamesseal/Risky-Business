@@ -59,25 +59,29 @@ export const DEFAULT_CARDS: Card[] = [
   c("chal-15", "Mat Stack", "Stack five beer mats and cap them with one hand.", "Hard", "Pub"),
   c("chal-16", "Wall Handstand", "Kick up to a wall handstand and hold it for 10 seconds.", "Extreme", "Home"),
 
-  // ---- Mini Games (solo skill — the active player passes or fails for points)
-  m("mini-05", "Coaster Toss", "Land a coaster onto an empty glass from a step away.", "Hard", "Pub"),
-  m("mini-07", "Countdown", "Make the longest word from 7 random letters in 30 seconds.", "Hard", "All"),
-  m("mini-08", "Staring Contest", "Win a staring contest against the player of your choice.", "Easy", "All"),
-  m("mini-11", "Beatbox Battle", "Keep a beat going while the group raps over it for 20 seconds.", "Hard", "Club/Festival"),
+  // ---- former solo mini games, now solo Challenges -------------------------
+  c("chal-17", "Coaster Toss", "Land a coaster onto an empty glass from a step away.", "Hard", "Pub"),
+  c("chal-18", "Countdown", "Make the longest word from 7 random letters in 30 seconds.", "Hard", "All"),
+  c("chal-19", "Staring Contest", "Win a staring contest against the player of your choice.", "Easy", "All"),
+  c("chal-20", "Beatbox Battle", "Keep a beat going while the group raps over it for 20 seconds.", "Hard", "Club/Festival"),
 
-  // ---- Group Rounds (everyone joins in — no points, just for fun) -----------
+  // ---- Mini Games (whole group plays, then pick the winner for the points) --
+  m("mini-01", "Categories", "Pick a category and name things round the group. Last one who can keep going wins.", "Medium", "All"),
+  m("mini-02", "Rhyme Time", "Pick a word and rhyme it round the group. Last one still rhyming wins.", "Medium", "All"),
+  m("mini-03", "Word Chain", "Category word chain round the group. Last one who hasn't blanked or repeated wins.", "Hard", "All"),
+  m("mini-04", "RPS Champion", "Rock–paper–scissors knockout round the group. The champion wins.", "Easy", "All"),
+  m("mini-05", "Thumb War", "Best-of-three thumb war between two willing players. The winner takes it.", "Easy", "All"),
+  m("mini-06", "The Floor Is Lava", "On three, feet off the floor. Group picks who got up cleanest.", "Easy", "Home"),
+  m("mini-07", "Freeze Dance", "Everyone dances; freeze on command. Group picks the best.", "Medium", "Club/Festival"),
+
+  // ---- Group Rounds (no winner — just for fun, no points) -------------------
   g("group-01", "Never Have I Ever", "One round: everyone puts a finger down for things they've done.", "Easy", "All"),
   g("group-02", "Would You Rather", "The group hits the table with a brutal 'would you rather'. Everyone answers.", "Easy", "All"),
-  g("group-03", "Categories", "Pick a category and go round naming things until someone blanks.", "Easy", "All"),
   g("group-04", "20 Questions", "The group thinks of something; everyone guesses it in 20 questions.", "Easy", "All"),
-  g("group-05", "Rhyme Time", "Pick a word and go round rhyming it until someone gets stuck.", "Easy", "All"),
   g("group-06", "Most Likely To", "On three, everyone points at who's most likely to do a thing the group names.", "Easy", "All"),
   g("group-07", "Hot Seat", "The group fires quick questions at the phone-holder for 30 seconds.", "Medium", "All"),
   g("group-08", "This or That", "Rapid-fire: the group shouts pairs, everyone calls out their pick.", "Easy", "All"),
   g("group-09", "Group Vote", "Vote on a silly superlative for the table. Majority wins the title.", "Easy", "All"),
-  g("group-10", "The Floor Is Lava", "On the count of three, everyone gets their feet off the floor.", "Easy", "Home"),
-  g("group-11", "Freeze Dance", "Everyone dances until the phone-holder yells freeze.", "Easy", "Club/Festival"),
-  g("group-12", "Word Chain", "Category word chain around the group — keep it going as long as you can.", "Easy", "All"),
 
   // ---- Ongoing (start now, keep it up until your next turn, checked then) ---
   o("ongoing-01", "Accent", "Speak in a fake accent until your next turn.", "Easy", "All"),
@@ -101,7 +105,7 @@ function make(
   difficulty: Card["difficulty"],
   location: Card["location"],
 ): Card {
-  return { id, title, description, category, difficulty, location, enabled: true };
+  return { id, title, description, category, difficulty, location };
 }
 
 function t(id: string, title: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
