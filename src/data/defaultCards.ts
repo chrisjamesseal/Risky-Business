@@ -13,12 +13,12 @@ export const DEFAULT_CARDS: Card[] = [
   t("truth-05", "Secret Talent", "Reveal a talent nobody in this room knows you have.", "Easy", "All"),
   t("truth-06", "Biggest Fear", "What's a fear you've never told anyone here?", "Medium", "All"),
   t("truth-07", "White Lie", "Tell everyone about the last white lie you told.", "Medium", "All"),
-  t("truth-08", "Group Ranking", "Rank the other players by who you'd trust with your phone unlocked.", "Hard", "All"),
-  t("truth-09", "Regret", "Share a small decision you still regret.", "Hard", "All"),
+  t("truth-08", "Group Ranking", "Rank the other players by who you'd trust with your phone unlocked.", "Medium", "All"),
+  t("truth-09", "Regret", "Share a small decision you still regret.", "Medium", "All"),
   t("truth-10", "Pub Confession", "What's the most you've ever spent on a night out?", "Medium", "Pub"),
   t("truth-11", "Dance Floor", "Have you ever pretended to know a song at a club? Confess.", "Easy", "Club/Festival"),
   t("truth-12", "House Rules", "What's the weirdest thing in your home right now?", "Easy", "Home"),
-  t("truth-13", "Overshare", "What's a story you tell that always gets exaggerated?", "Hard", "All"),
+  t("truth-13", "Overshare", "What's a story you tell that always gets exaggerated?", "Medium", "All"),
   t("truth-14", "Two Truths", "Tell two truths and one lie. Let the group guess the lie.", "Medium", "All"),
 
   // ------------------------------------------------------------------ Dares
@@ -37,6 +37,11 @@ export const DEFAULT_CARDS: Card[] = [
   d("dare-13", "Whisper Only", "Only whisper until your next turn or lose your points.", "Medium", "All"),
   d("dare-14", "Trust Fall", "Do a mini trust-lean into a willing player's hands.", "Hard", "All"),
   d("dare-15", "Selfie Face", "Take the ugliest selfie you can and show the group.", "Easy", "All"),
+  d("dare-16", "Group's Choice", "The group sets you a dare right now. You have to attempt it.", "Hard", "All"),
+  d("dare-17", "Camera Roll", "Show the group the most recent photo on your phone.", "Extreme", "All"),
+  d("dare-18", "Festival Anthem", "Sing a full verse loud enough for people nearby to hear.", "Extreme", "Club/Festival"),
+  d("dare-19", "Table Toast", "Stand and give a 20 second toast to the whole table.", "Hard", "Pub"),
+  d("dare-20", "Slow-Mo Entrance", "Leave and re-enter the room in dramatic slow motion for the group to score.", "Hard", "Home"),
 
   // -------------------------------------------------------------- Challenges
   c("chal-01", "Tongue Twister", "Say 'red lorry, yellow lorry' five times fast.", "Easy", "All"),
@@ -51,6 +56,10 @@ export const DEFAULT_CARDS: Card[] = [
   c("chal-10", "Keepy Uppy", "Keep a balloon or cushion in the air for 20 seconds.", "Easy", "Home"),
   c("chal-11", "Straight Face", "Keep a straight face while the group tries to make you laugh.", "Hard", "All"),
   c("chal-12", "Speed Spell", "Spell 'onomatopoeia' correctly out loud.", "Extreme", "All"),
+  c("chal-13", "Total Recall", "Name every card played so far this game, in order.", "Hard", "All"),
+  c("chal-14", "Plank Quiz", "Hold a plank while the group asks you three quick questions.", "Extreme", "All"),
+  c("chal-15", "Mat Stack", "Stack five beer mats and cap them with one hand.", "Hard", "Pub"),
+  c("chal-16", "Wall Handstand", "Kick up to a wall handstand and hold it for 10 seconds.", "Extreme", "Home"),
 
   // -------------------------------------------------------------- Mini Games
   m("mini-01", "Categories", "Group names things in a category (e.g. crisps). First to blank loses.", "Medium", "All"),
@@ -63,6 +72,8 @@ export const DEFAULT_CARDS: Card[] = [
   m("mini-08", "Staring Contest", "Win a staring contest against the player of your choice.", "Easy", "All"),
   m("mini-09", "20 Questions", "The group thinks of a thing; guess it in 20 questions.", "Medium", "All"),
   m("mini-10", "Would You Rather", "Answer a brutal 'would you rather' from the group.", "Easy", "All"),
+  m("mini-11", "Beatbox Battle", "Keep a beat going while the group raps over it for 20 seconds.", "Hard", "Club/Festival"),
+  m("mini-12", "Word Chain", "Category word chain around the group. First to blank or repeat loses.", "Hard", "All"),
 
   // ------------------------------------------------------------ Chaos Events
   x("chaos-01", "Score Swap!", "Swap scores with the player to your left. Chaos reigns.", "Medium", "All"),

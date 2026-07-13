@@ -6,7 +6,14 @@ import {
   type Card,
   type Category,
 } from "../types";
-import { Button, CATEGORY_ICON, CATEGORY_SHORT } from "../components/ui";
+import {
+  Button,
+  CATEGORY_COLOR,
+  CATEGORY_ICON,
+  CATEGORY_SHORT,
+  DifficultyBadge,
+} from "../components/ui";
+import { GameCard } from "../components/GameCard";
 import { makeId, sanitizeCards } from "../storage/localStorage";
 
 type Draft = Omit<Card, "id"> & { id?: string };
@@ -62,15 +69,22 @@ export function CardEditorScreen({
 
   const remove = (id: string) => {
     onChange(cards.filter((c) => c.id !== id));
+    setDraft(null);
     onToast("Card deleted");
   };
 
-  const duplicate = (card: Card) => {
-    const copy: Card = { ...card, id: makeId(), title: `${card.title} (copy)` };
+  const duplicate = (card: Draft) => {
+    if (!card.id) return;
+    const copy: Card = {
+      ...(card as Card),
+      id: makeId(),
+      title: `${card.title} (copy)`,
+    };
     const index = cards.findIndex((c) => c.id === card.id);
     const next = cards.slice();
     next.splice(index + 1, 0, copy);
     onChange(next);
+    setDraft(null);
     onToast("Card duplicated");
   };
 
@@ -114,6 +128,8 @@ export function CardEditorScreen({
         draft={draft}
         onSave={upsert}
         onCancel={() => setDraft(null)}
+        onDelete={draft.id ? () => remove(draft.id!) : undefined}
+        onDuplicate={draft.id ? () => duplicate(draft) : undefined}
       />
     );
   }
@@ -146,48 +162,43 @@ export function CardEditorScreen({
       </Button>
 
       <div className="stack--sm">
-        {visible.length === 0 && (
-          <p className="muted">No {filter} cards yet.</p>
-        )}
+        {visible.length === 0 && <p className="muted">No {filter} cards yet.</p>}
         {visible.map((card) => (
           <div
             key={card.id}
-            className={"list-item" + (card.enabled ? "" : " list-item--disabled")}
+            className={
+              "editor-item" + (card.enabled ? "" : " editor-item--off")
+            }
           >
-            <div className="list-item__body">
-              <div className="list-item__title">{card.title}</div>
-              <div className="list-item__meta">
-                {card.difficulty} · {card.location}
-                {card.enabled ? "" : " · disabled"}
-              </div>
-            </div>
             <button
-              className="icon-btn"
-              onClick={() => toggleEnabled(card.id)}
-              title={card.enabled ? "Disable" : "Enable"}
-            >
-              {card.enabled ? "👁" : "🚫"}
-            </button>
-            <button
-              className="icon-btn"
+              className="editor-item__main"
               onClick={() => setDraft(card)}
-              title="Edit"
             >
-              ✎
+              <span
+                className="editor-item__icon"
+                style={{ color: CATEGORY_COLOR[card.category] }}
+              >
+                {CATEGORY_ICON[card.category]}
+              </span>
+              <span className="editor-item__body">
+                <span className="editor-item__title">{card.title}</span>
+                <span className="editor-item__meta">
+                  <DifficultyBadge difficulty={card.difficulty} />
+                  <span className="editor-item__loc">{card.location}</span>
+                </span>
+              </span>
+              <span className="editor-item__edit">✎ Edit</span>
             </button>
             <button
-              className="icon-btn"
-              onClick={() => duplicate(card)}
-              title="Duplicate"
+              className={
+                "editor-item__toggle editor-item__toggle--" +
+                (card.enabled ? "on" : "off")
+              }
+              onClick={() => toggleEnabled(card.id)}
+              aria-pressed={card.enabled}
+              title={card.enabled ? "Enabled — tap to disable" : "Disabled — tap to enable"}
             >
-              ⧉
-            </button>
-            <button
-              className="icon-btn"
-              onClick={() => remove(card.id)}
-              title="Delete"
-            >
-              🗑
+              {card.enabled ? "ON" : "OFF"}
             </button>
           </div>
         ))}
@@ -222,14 +233,35 @@ function CardForm({
   draft,
   onSave,
   onCancel,
+  onDelete,
+  onDuplicate,
 }: {
   draft: Draft;
   onSave: (draft: Draft) => void;
   onCancel: () => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
 }) {
   const [value, setValue] = useState<Draft>(draft);
   const set = <K extends keyof Draft>(key: K, v: Draft[K]) =>
     setValue((prev) => ({ ...prev, [key]: v }));
+
+  // A card to render in the live preview — fall back to placeholders while empty.
+  const preview: Card = {
+    id: value.id ?? "preview",
+    title: value.title.trim() || "Card title",
+    description: value.description.trim() || "Card description shows here…",
+    category: value.category,
+    difficulty: value.difficulty,
+    location: value.location,
+    enabled: value.enabled,
+  };
+
+  const confirmDelete = () => {
+    if (onDelete && window.confirm(`Delete "${value.title || "this card"}"?`)) {
+      onDelete();
+    }
+  };
 
   return (
     <div className="screen">
@@ -240,6 +272,9 @@ function CardForm({
         <h2>{draft.id ? "Edit Card" : "New Card"}</h2>
       </div>
 
+      <div className="section-title">Preview</div>
+      <GameCard card={preview} />
+
       <div className="field">
         <label htmlFor="title">Title</label>
         <input
@@ -247,6 +282,7 @@ function CardForm({
           type="text"
           value={value.title}
           maxLength={40}
+          autoFocus
           onChange={(e) => set("title", e.target.value)}
         />
       </div>
@@ -313,13 +349,28 @@ function CardForm({
         onClick={() => set("enabled", !value.enabled)}
         aria-pressed={value.enabled}
       >
-        <span>Enabled</span>
+        <span>Enabled in games</span>
         <span
           className={`toggle__state toggle__state--${value.enabled ? "on" : "off"}`}
         >
           {value.enabled ? "ON" : "OFF"}
         </span>
       </button>
+
+      {(onDuplicate || onDelete) && (
+        <div className="btn-row">
+          {onDuplicate && (
+            <Button variant="secondary" onClick={onDuplicate}>
+              ⧉ Duplicate
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="danger" onClick={confirmDelete}>
+              🗑 Delete
+            </Button>
+          )}
+        </div>
+      )}
 
       <div className="spacer" />
       <div className="btn-row">

@@ -11,6 +11,7 @@ import {
 import { Toast } from "./components/ui";
 import { HomeScreen } from "./screens/HomeScreen";
 import { HelpScreen } from "./screens/HelpScreen";
+import { ChangelogScreen } from "./screens/ChangelogScreen";
 import { SetupScreen } from "./screens/SetupScreen";
 import { GameScreen } from "./screens/GameScreen";
 import { ResultsScreen } from "./screens/ResultsScreen";
@@ -24,7 +25,8 @@ type Screen =
   | "results"
   | "settings"
   | "editor"
-  | "help";
+  | "help"
+  | "changelog";
 
 interface Results {
   players: Player[];
@@ -123,8 +125,13 @@ export function App() {
           onChange={setSettings}
           onOpenEditor={() => setScreen("editor")}
           onResetCards={handleResetCards}
+          onShowChangelog={() => setScreen("changelog")}
           onBack={() => setScreen("home")}
         />
+      )}
+
+      {screen === "changelog" && (
+        <ChangelogScreen onBack={() => setScreen("settings")} />
       )}
 
       {screen === "editor" && (

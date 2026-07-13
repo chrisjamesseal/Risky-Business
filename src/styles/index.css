@@ -737,6 +737,129 @@ select:focus {
   color: var(--yellow);
 }
 
+/* Card editor list rows — tap to edit, clear enable toggle. */
+.editor-item {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.editor-item--off {
+  opacity: 0.5;
+}
+.editor-item__main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-family: var(--font);
+  font-weight: 700;
+  text-align: left;
+  color: var(--ink);
+  background: var(--panel);
+  border: 3px solid var(--border);
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.editor-item__icon {
+  font-size: 20px;
+}
+.editor-item__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.editor-item__title {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.editor-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.editor-item__loc {
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.editor-item__edit {
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.editor-item__toggle {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  border: 3px solid var(--border);
+  padding: 0 12px;
+  cursor: pointer;
+  min-width: 52px;
+}
+.editor-item__toggle--on {
+  background: var(--green);
+  color: var(--border);
+}
+.editor-item__toggle--off {
+  background: var(--bg-2);
+  color: var(--ink-dim);
+}
+
+/* Changelog. */
+.version-btn {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--cyan);
+  background: transparent;
+  border: none;
+  padding: 8px 0 0;
+  margin: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.changelog__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.changelog__version {
+  font-size: 16px;
+  color: var(--yellow);
+  letter-spacing: 1px;
+}
+.changelog__title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cyan);
+}
+.changelog__list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.changelog__list li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
 .stack {
   display: flex;
   flex-direction: column;
