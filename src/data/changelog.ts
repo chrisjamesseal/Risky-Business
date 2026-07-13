@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.8.0";
+export const APP_VERSION = "1.9.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.9.0",
+    title: "Lifeline tweaks",
+    changes: [
+      "Swapping a card now costs 100 points",
+      "The leaderboard shows each player's ×2 and 🔄 lifelines and whether they're used",
+      "×2 Double Points is now a big button on the pass-the-phone screen; Swap sits under Complete/Fail",
+    ],
+  },
   {
     version: "1.8.0",
     title: "Custom categories",

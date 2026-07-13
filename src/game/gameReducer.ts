@@ -50,6 +50,9 @@ export interface NewGameConfig {
 // scoring card, when any interludes remain.
 const INTERLUDE_CHANCE = 0.28;
 
+/** Points deducted for using the Swap lifeline. */
+export const SWAP_COST = 100;
+
 export function createGame(config: NewGameConfig): GameState {
   const players: Player[] = config.names.map((name, index) => ({
     id: `player-${index}`,
@@ -193,7 +196,12 @@ function swap(state: GameState): GameState {
     // retired card returns to the back of the queue
     scoringQueue: [...rest, state.currentCard],
     currentCard: replacement,
-    players: updateCurrentPlayer(state, (p) => ({ ...p, swapUsed: true })),
+    // Swapping costs 100 points.
+    players: updateCurrentPlayer(state, (p) => ({
+      ...p,
+      swapUsed: true,
+      score: p.score - SWAP_COST,
+    })),
   };
 }
 
