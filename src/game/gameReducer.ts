@@ -20,6 +20,8 @@ export interface GameState {
   currentCard: Card | null;
   /** A non-scoring Group Round or Chaos Event to show before the scoring card. */
   pendingInterlude: Card | null;
+  /** True when a "Double Trouble" interlude has doubled this turn's card. */
+  chaosDoubled: boolean;
   /** Points awarded on the most recent resolution (for the result screen). */
   lastAward: number | null;
   lastDoubled: boolean;
@@ -69,6 +71,7 @@ export function createGame(config: NewGameConfig): GameState {
     phase: "ready",
     currentCard: null,
     pendingInterlude: null,
+    chaosDoubled: false,
     lastAward: null,
     lastDoubled: false,
     finished: false,
@@ -144,6 +147,7 @@ function reveal(state: GameState, roll: number): GameState {
       interludeQueue: restInterludes,
       currentCard: card,
       pendingInterlude: interlude,
+      chaosDoubled: interlude.doublesNext === true,
       phase: "interlude",
     };
   }
@@ -151,6 +155,7 @@ function reveal(state: GameState, roll: number): GameState {
     ...state,
     scoringQueue: restScoring,
     currentCard: card,
+    chaosDoubled: false,
     phase: "card",
   };
 }
@@ -173,7 +178,8 @@ function swap(state: GameState): GameState {
 function resolve(state: GameState, completed: boolean): GameState {
   if (state.phase !== "card" || !state.currentCard) return state;
   const player = state.players[state.currentPlayerIndex];
-  const doubled = player.doublePointsArmed;
+  // Doubled by the player's lifeline OR a Double Trouble chaos card this turn.
+  const doubled = player.doublePointsArmed || state.chaosDoubled;
   const award = completed ? cardPoints(state.currentCard, doubled) : 0;
 
   return {
@@ -183,8 +189,8 @@ function resolve(state: GameState, completed: boolean): GameState {
       score: p.score + award,
       scoringTurnsCompleted: p.scoringTurnsCompleted + 1,
       doublePointsArmed: false,
-      // Arming is consumed whether the card is completed or failed.
-      doublePointsUsed: p.doublePointsUsed || doubled,
+      // Only the lifeline is consumed; the chaos effect is free.
+      doublePointsUsed: p.doublePointsUsed || player.doublePointsArmed,
     })),
     lastAward: award,
     lastDoubled: doubled,
@@ -216,6 +222,7 @@ function next(state: GameState): GameState {
     currentPlayerIndex: idx,
     currentCard: null,
     pendingInterlude: null,
+    chaosDoubled: false,
     lastAward: null,
     lastDoubled: false,
     phase: "ready",

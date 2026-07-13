@@ -29,9 +29,8 @@ export function GameScreen({
   const everyoneDoneAfterThis = state.players.every(
     (p) => p.scoringTurnsCompleted >= SCORING_TURNS_PER_PLAYER,
   );
-  const stake = state.currentCard
-    ? cardPoints(state.currentCard, player.doublePointsArmed)
-    : 0;
+  const doubled = player.doublePointsArmed || state.chaosDoubled;
+  const stake = state.currentCard ? cardPoints(state.currentCard, doubled) : 0;
 
   const quit = () => {
     if (window.confirm("Quit the game? All scores will be lost.")) onQuit();
@@ -95,7 +94,7 @@ export function GameScreen({
               <p className="handoff__hint muted">
                 {player.doublePointsUsed
                   ? " "
-                  : "Tip: tap ×2 first to double this card"}
+                  : "Tip: tap ×2 above before you reveal — it locks once the card is out."}
               </p>
             )}
             <Button
@@ -127,10 +126,7 @@ export function GameScreen({
 
         {state.phase === "card" && state.currentCard && (
           <div className="stack">
-            <GameCard
-              card={state.currentCard}
-              doubled={player.doublePointsArmed}
-            />
+            <GameCard card={state.currentCard} doubled={doubled} />
             <div className="btn-row">
               <Button
                 variant="success"

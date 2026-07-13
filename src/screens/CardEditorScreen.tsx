@@ -182,7 +182,11 @@ export function CardEditorScreen({
                 {CATEGORY_ICON[card.category]}
               </span>
               <span className="editor-item__body">
-                <span className="editor-item__title">{card.title}</span>
+                <span className="editor-item__titlerow">
+                  <span className="editor-item__title">{card.title}</span>
+                  <span className="editor-item__edit">✎ Edit</span>
+                </span>
+                <span className="editor-item__desc">{card.description}</span>
                 <span className="editor-item__meta">
                   {isScoringCategory(card.category) ? (
                     <DifficultyBadge difficulty={card.difficulty} />
@@ -192,7 +196,6 @@ export function CardEditorScreen({
                   <span className="editor-item__loc">{card.location}</span>
                 </span>
               </span>
-              <span className="editor-item__edit">✎ Edit</span>
             </button>
             <button
               className={

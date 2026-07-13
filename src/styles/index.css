@@ -774,7 +774,7 @@ select:focus {
 .editor-item__main {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   min-width: 0;
   font-family: var(--font);
@@ -788,21 +788,37 @@ select:focus {
 }
 .editor-item__icon {
   font-size: 20px;
+  line-height: 1.2;
 }
 .editor-item__body {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+}
+.editor-item__titlerow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
 }
 .editor-item__title {
+  flex: 1;
+  min-width: 0;
   font-size: 15px;
   text-transform: uppercase;
   letter-spacing: 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.editor-item__desc {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  white-space: normal;
 }
 .editor-item__meta {
   display: flex;

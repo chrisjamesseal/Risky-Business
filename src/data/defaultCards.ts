@@ -83,7 +83,7 @@ export const DEFAULT_CARDS: Card[] = [
 
   // ------------------------------------------------------------ Chaos Events
   x("chaos-01", "Score Swap!", "Swap scores with the player to your left. Chaos reigns.", "Medium", "All"),
-  x("chaos-02", "Double Trouble", "Everyone's next card is worth double. Brace yourselves.", "Medium", "All"),
+  { ...x("chaos-02", "Double Trouble", "This turn's card is worth double points. Brace yourself!", "Medium", "All"), doublesNext: true },
   x("chaos-03", "Great Reversal", "Play order reverses for the rest of the round.", "Easy", "All"),
   x("chaos-04", "Robbery", "Steal 100 points from the current leader.", "Hard", "All"),
   x("chaos-05", "Group Toast", "Everyone raise a glass (or hand) and cheer the loudest.", "Easy", "All"),
