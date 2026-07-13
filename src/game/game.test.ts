@@ -295,3 +295,56 @@ describe("game reducer", () => {
     }
   });
 });
+
+describe("Double Trouble chaos card", () => {
+  it("marks the default card with doublesNext", () => {
+    const dt = DEFAULT_CARDS.find((c) => c.title === "Double Trouble");
+    expect(dt?.doublesNext).toBe(true);
+  });
+
+  const easy = (id: string): Card => ({
+    id,
+    title: id,
+    description: "answer",
+    category: "Truth",
+    difficulty: "Easy",
+    location: "All",
+    enabled: true,
+  });
+
+  it("doubles the following card without consuming the lifeline", () => {
+    const cards: Card[] = [
+      easy("t1"),
+      easy("t2"),
+      {
+        id: "dt",
+        title: "Double Trouble",
+        description: "double it",
+        category: "Chaos Event",
+        difficulty: "Medium",
+        location: "All",
+        enabled: true,
+        doublesNext: true,
+      },
+    ];
+    let state = createGame({
+      names: ["A", "B"],
+      location: "Home",
+      drinkMode: false,
+      cards,
+      seed: 1,
+    });
+    // roll 0 forces the only interlude (the doubler) to appear
+    state = gameReducer(state, { type: "REVEAL", roll: 0 });
+    expect(state.phase).toBe("interlude");
+    expect(state.pendingInterlude?.doublesNext).toBe(true);
+    expect(state.chaosDoubled).toBe(true);
+
+    state = gameReducer(state, { type: "CONTINUE_INTERLUDE" });
+    const expected = cardPoints(state.currentCard!, true);
+    state = gameReducer(state, { type: "COMPLETE" });
+    expect(state.players[0].score).toBe(expected); // Easy 100 -> 200
+    // The chaos effect is free — the player's own lifeline is untouched.
+    expect(state.players[0].doublePointsUsed).toBe(false);
+  });
+});

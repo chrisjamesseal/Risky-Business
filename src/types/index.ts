@@ -47,6 +47,11 @@ export interface Card {
   difficulty: Difficulty;
   location: CardLocation;
   enabled: boolean;
+  /**
+   * Interlude effect: when this card is shown, the scoring card that follows it
+   * this turn is worth double points. Used by the "Double Trouble" chaos card.
+   */
+  doublesNext?: boolean;
 }
 
 export interface Player {

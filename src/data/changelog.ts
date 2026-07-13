@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.3.1";
+export const APP_VERSION = "1.4.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.4.0",
+    title: "Double points fixes",
+    changes: [
+      "The 'Double Trouble' chaos card now really doubles that turn's card — it was only flavour text before",
+      "Made the ×2 lifeline clearer: it's a pre-reveal gamble that locks once the card is out",
+      "Card editor list now shows each card's full description without opening it",
+    ],
+  },
   {
     version: "1.3.1",
     title: "Editor tweaks",
