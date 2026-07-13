@@ -1,5 +1,6 @@
-import { DIFFICULTY_POINTS, isScoringCategory, type Card } from "../types";
-import { CATEGORY_COLOR, CATEGORY_ICON, DifficultyBadge } from "./ui";
+import { DIFFICULTY_POINTS, isScoringBehavior, type Card } from "../types";
+import { useCategory } from "../state/CategoriesContext";
+import { DifficultyBadge } from "./ui";
 
 export function GameCard({
   card,
@@ -8,9 +9,10 @@ export function GameCard({
   card: Card;
   doubled?: boolean;
 }) {
-  const scoring = isScoringCategory(card.category);
-  const isRound = card.category === "Group Round";
-  const isOngoing = card.category === "Ongoing";
+  const category = useCategory(card.category);
+  const scoring = isScoringBehavior(category.behavior);
+  const isRound = category.behavior === "group";
+  const isOngoing = category.behavior === "ongoing";
   const points = DIFFICULTY_POINTS[card.difficulty] * (doubled ? 2 : 1);
 
   const badge = scoring ? `${points} PTS${doubled ? " x2" : ""}` : "NO POINTS";
@@ -23,11 +25,8 @@ export function GameCard({
   return (
     <div className={className}>
       <div className="game-card__top">
-        <span
-          className="game-card__category"
-          style={{ color: CATEGORY_COLOR[card.category] }}
-        >
-          {CATEGORY_ICON[card.category]} {card.category}
+        <span className="game-card__category" style={{ color: category.color }}>
+          {category.icon} {card.category}
         </span>
         <span className="game-card__points">{badge}</span>
       </div>

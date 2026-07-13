@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.7.0";
+export const APP_VERSION = "1.8.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.8.0",
+    title: "Custom categories",
+    changes: [
+      "Create your own card categories and delete ones you don't want in the Card Editor",
+      "Each category has a behaviour: do-it-now scoring, group game with a winner, ongoing task, or a no-points round",
+      "Editing a category updates its cards; deleting one removes its cards",
+    ],
+  },
   {
     version: "1.7.0",
     title: "Mini Games with winners",

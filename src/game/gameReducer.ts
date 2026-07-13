@@ -1,6 +1,9 @@
 import {
+  behaviorByCategory,
   SCORING_TURNS_PER_PLAYER,
+  type BehaviorByCategory,
   type Card,
+  type CategoryDef,
   type Difficulty,
   type GameLocation,
   type Player,
@@ -28,6 +31,8 @@ export interface GameState {
   lastMissionStarted: boolean;
   /** Name of the Mini Game winner just awarded, if any. */
   lastWinnerName: string | null;
+  /** Behaviour of each category name, so the reducer knows how cards resolve. */
+  behavior: BehaviorByCategory;
   finished: boolean;
 }
 
@@ -37,6 +42,7 @@ export interface NewGameConfig {
   drinkMode: boolean;
   difficulties: Difficulty[];
   cards: Card[];
+  categories: CategoryDef[];
   seed?: number;
 }
 
@@ -60,6 +66,7 @@ export function createGame(config: NewGameConfig): GameState {
   // Buffer covers up to one Swap per player without exhausting the deck.
   const deck = buildDeck(
     config.cards,
+    config.categories,
     config.location,
     scoringNeeded,
     players.length,
@@ -81,6 +88,7 @@ export function createGame(config: NewGameConfig): GameState {
     lastDoubled: false,
     lastMissionStarted: false,
     lastWinnerName: null,
+    behavior: behaviorByCategory(config.categories),
     finished: false,
   };
 }
@@ -220,7 +228,7 @@ function resolve(state: GameState, completed: boolean): GameState {
  */
 function awardMini(state: GameState, winnerId: string | null): GameState {
   if (state.phase !== "card" || !state.currentCard) return state;
-  if (state.currentCard.category !== "Mini Game") return state;
+  if (state.behavior[state.currentCard.category] !== "mini") return state;
   const currentIndex = state.currentPlayerIndex;
   const doubled = state.players[currentIndex].doublePointsArmed;
   const award = winnerId ? cardPoints(state.currentCard, doubled) : 0;
@@ -261,7 +269,7 @@ function awardMini(state: GameState, winnerId: string | null): GameState {
  */
 function startMission(state: GameState): GameState {
   if (state.phase !== "card" || !state.currentCard) return state;
-  if (state.currentCard.category !== "Ongoing") return state;
+  if (state.behavior[state.currentCard.category] !== "ongoing") return state;
   const player = state.players[state.currentPlayerIndex];
   const doubled = player.doublePointsArmed;
   const points = cardPoints(state.currentCard, doubled);

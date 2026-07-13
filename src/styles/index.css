@@ -329,6 +329,16 @@ select:focus {
   gap: 8px;
 }
 
+.chip-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chip-col .chip {
+  flex: none;
+  text-align: left;
+}
+
 .chip {
   font-family: var(--font);
   font-weight: 700;
