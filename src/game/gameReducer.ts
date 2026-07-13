@@ -7,7 +7,7 @@ import {
 import { buildDeck } from "./deckBuilder";
 import { cardPoints } from "./scoring";
 
-export type TurnPhase = "ready" | "chaos" | "card" | "result";
+export type TurnPhase = "ready" | "interlude" | "card" | "result";
 
 export interface GameState {
   players: Player[];
@@ -15,10 +15,11 @@ export interface GameState {
   location: GameLocation;
   drinkMode: boolean;
   scoringQueue: Card[];
-  chaosQueue: Card[];
+  interludeQueue: Card[];
   phase: TurnPhase;
   currentCard: Card | null;
-  pendingChaos: Card | null;
+  /** A non-scoring Group Round or Chaos Event to show before the scoring card. */
+  pendingInterlude: Card | null;
   /** Points awarded on the most recent resolution (for the result screen). */
   lastAward: number | null;
   lastDoubled: boolean;
@@ -33,7 +34,9 @@ export interface NewGameConfig {
   seed?: number;
 }
 
-const CHAOS_CHANCE = 0.22;
+// Chance a non-scoring interlude (Group Round or Chaos Event) shows before a
+// scoring card, when any interludes remain.
+const INTERLUDE_CHANCE = 0.28;
 
 export function createGame(config: NewGameConfig): GameState {
   const players: Player[] = config.names.map((name, index) => ({
@@ -62,10 +65,10 @@ export function createGame(config: NewGameConfig): GameState {
     location: config.location,
     drinkMode: config.drinkMode,
     scoringQueue: deck.scoring,
-    chaosQueue: deck.chaos,
+    interludeQueue: deck.interludes,
     phase: "ready",
     currentCard: null,
-    pendingChaos: null,
+    pendingInterlude: null,
     lastAward: null,
     lastDoubled: false,
     finished: false,
@@ -75,7 +78,7 @@ export function createGame(config: NewGameConfig): GameState {
 export type GameAction =
   | { type: "ARM_DOUBLE" }
   | { type: "REVEAL"; roll: number }
-  | { type: "CONTINUE_CHAOS" }
+  | { type: "CONTINUE_INTERLUDE" }
   | { type: "SWAP" }
   | { type: "COMPLETE" }
   | { type: "FAIL" }
@@ -87,9 +90,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return armDouble(state);
     case "REVEAL":
       return reveal(state, action.roll);
-    case "CONTINUE_CHAOS":
-      return state.phase === "chaos"
-        ? { ...state, phase: "card", pendingChaos: null }
+    case "CONTINUE_INTERLUDE":
+      return state.phase === "interlude"
+        ? { ...state, phase: "card", pendingInterlude: null }
         : state;
     case "SWAP":
       return swap(state);
@@ -131,16 +134,17 @@ function reveal(state: GameState, roll: number): GameState {
   const [card, ...restScoring] = state.scoringQueue;
   if (!card) return state; // safety: nothing left to draw
 
-  const injectChaos = roll < CHAOS_CHANCE && state.chaosQueue.length > 0;
-  if (injectChaos) {
-    const [chaos, ...restChaos] = state.chaosQueue;
+  const injectInterlude =
+    roll < INTERLUDE_CHANCE && state.interludeQueue.length > 0;
+  if (injectInterlude) {
+    const [interlude, ...restInterludes] = state.interludeQueue;
     return {
       ...state,
       scoringQueue: restScoring,
-      chaosQueue: restChaos,
+      interludeQueue: restInterludes,
       currentCard: card,
-      pendingChaos: chaos,
-      phase: "chaos",
+      pendingInterlude: interlude,
+      phase: "interlude",
     };
   }
   return {
@@ -211,7 +215,7 @@ function next(state: GameState): GameState {
     ...state,
     currentPlayerIndex: idx,
     currentCard: null,
-    pendingChaos: null,
+    pendingInterlude: null,
     lastAward: null,
     lastDoubled: false,
     phase: "ready",

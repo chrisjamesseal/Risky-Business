@@ -61,19 +61,25 @@ export const DEFAULT_CARDS: Card[] = [
   c("chal-15", "Mat Stack", "Stack five beer mats and cap them with one hand.", "Hard", "Pub"),
   c("chal-16", "Wall Handstand", "Kick up to a wall handstand and hold it for 10 seconds.", "Extreme", "Home"),
 
-  // -------------------------------------------------------------- Mini Games
-  m("mini-01", "Categories", "Group names things in a category (e.g. crisps). First to blank loses.", "Medium", "All"),
-  m("mini-02", "Never Have I Ever", "Play one round. Everyone reveals with fingers down.", "Easy", "All"),
-  m("mini-03", "The Floor Is Lava", "Last player to get their feet off the floor loses a point.", "Easy", "Home"),
-  m("mini-04", "Rhyme Time", "Go round rhyming a word. First to fail is out.", "Medium", "All"),
+  // ---- Mini Games (solo skill — the active player passes or fails for points)
   m("mini-05", "Coaster Toss", "Land a coaster onto an empty glass from a step away.", "Hard", "Pub"),
-  m("mini-06", "Freeze Dance", "Dance until the group yells freeze. Last to stop loses.", "Medium", "Club/Festival"),
   m("mini-07", "Countdown", "Make the longest word from 7 random letters in 30 seconds.", "Hard", "All"),
   m("mini-08", "Staring Contest", "Win a staring contest against the player of your choice.", "Easy", "All"),
-  m("mini-09", "20 Questions", "The group thinks of a thing; guess it in 20 questions.", "Medium", "All"),
-  m("mini-10", "Would You Rather", "Answer a brutal 'would you rather' from the group.", "Easy", "All"),
   m("mini-11", "Beatbox Battle", "Keep a beat going while the group raps over it for 20 seconds.", "Hard", "Club/Festival"),
-  m("mini-12", "Word Chain", "Category word chain around the group. First to blank or repeat loses.", "Hard", "All"),
+
+  // ---- Group Rounds (everyone joins in — no points, just for fun) -----------
+  g("group-01", "Never Have I Ever", "One round: everyone puts a finger down for things they've done.", "Easy", "All"),
+  g("group-02", "Would You Rather", "The group hits the table with a brutal 'would you rather'. Everyone answers.", "Easy", "All"),
+  g("group-03", "Categories", "Pick a category and go round naming things until someone blanks.", "Easy", "All"),
+  g("group-04", "20 Questions", "The group thinks of something; everyone guesses it in 20 questions.", "Easy", "All"),
+  g("group-05", "Rhyme Time", "Pick a word and go round rhyming it until someone gets stuck.", "Easy", "All"),
+  g("group-06", "Most Likely To", "On three, everyone points at who's most likely to do a thing the group names.", "Easy", "All"),
+  g("group-07", "Hot Seat", "The group fires quick questions at the phone-holder for 30 seconds.", "Medium", "All"),
+  g("group-08", "This or That", "Rapid-fire: the group shouts pairs, everyone calls out their pick.", "Easy", "All"),
+  g("group-09", "Group Vote", "Vote on a silly superlative for the table. Majority wins the title.", "Easy", "All"),
+  g("group-10", "The Floor Is Lava", "On the count of three, everyone gets their feet off the floor.", "Easy", "Home"),
+  g("group-11", "Freeze Dance", "Everyone dances until the phone-holder yells freeze.", "Easy", "Club/Festival"),
+  g("group-12", "Word Chain", "Category word chain around the group — keep it going as long as you can.", "Easy", "All"),
 
   // ------------------------------------------------------------ Chaos Events
   x("chaos-01", "Score Swap!", "Swap scores with the player to your left. Chaos reigns.", "Medium", "All"),
@@ -110,6 +116,9 @@ function c(id: string, title: string, description: string, difficulty: Card["dif
 }
 function m(id: string, title: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
   return make(id, "Mini Game", title, description, difficulty, location);
+}
+function g(id: string, title: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
+  return make(id, "Group Round", title, description, difficulty, location);
 }
 function x(id: string, title: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
   return make(id, "Chaos Event", title, description, difficulty, location);

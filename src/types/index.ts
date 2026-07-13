@@ -5,11 +5,15 @@ export const CATEGORIES = [
   "Dare",
   "Challenge",
   "Mini Game",
+  "Group Round",
   "Chaos Event",
 ] as const;
 export type Category = (typeof CATEGORIES)[number];
 
-/** Categories that count as a scoring turn (everything except Chaos Event). */
+/**
+ * Categories that award points and count as a scoring turn. Group Rounds and
+ * Chaos Events are non-scoring interludes — everyone joins in, nobody scores.
+ */
 export const SCORING_CATEGORIES = [
   "Truth",
   "Dare",
@@ -17,6 +21,13 @@ export const SCORING_CATEGORIES = [
   "Mini Game",
 ] as const;
 export type ScoringCategory = (typeof SCORING_CATEGORIES)[number];
+
+/** Non-scoring interlude categories, shown between scoring turns. */
+export const INTERLUDE_CATEGORIES = ["Group Round", "Chaos Event"] as const;
+
+export function isScoringCategory(category: Category): boolean {
+  return (SCORING_CATEGORIES as readonly string[]).includes(category);
+}
 
 export const DIFFICULTIES = ["Easy", "Medium", "Hard", "Extreme"] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];

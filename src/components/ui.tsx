@@ -49,6 +49,7 @@ export const CATEGORY_ICON: Record<Category, string> = {
   Dare: "🔥",
   Challenge: "🎯",
   "Mini Game": "🕹️",
+  "Group Round": "🎉",
   "Chaos Event": "💥",
 };
 
@@ -57,6 +58,7 @@ export const CATEGORY_SHORT: Record<Category, string> = {
   Dare: "Dare",
   Challenge: "Chal",
   "Mini Game": "Mini",
+  "Group Round": "Group",
   "Chaos Event": "Chaos",
 };
 
@@ -65,6 +67,7 @@ export const CATEGORY_COLOR: Record<Category, string> = {
   Dare: "var(--pink)",
   Challenge: "var(--yellow)",
   "Mini Game": "var(--green)",
+  "Group Round": "var(--purple)",
   "Chaos Event": "var(--pink)",
 };
 

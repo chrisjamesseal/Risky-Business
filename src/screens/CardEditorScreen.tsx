@@ -3,6 +3,7 @@ import {
   CARD_LOCATIONS,
   CATEGORIES,
   DIFFICULTIES,
+  isScoringCategory,
   type Card,
   type Category,
 } from "../types";
@@ -183,7 +184,11 @@ export function CardEditorScreen({
               <span className="editor-item__body">
                 <span className="editor-item__title">{card.title}</span>
                 <span className="editor-item__meta">
-                  <DifficultyBadge difficulty={card.difficulty} />
+                  {isScoringCategory(card.category) ? (
+                    <DifficultyBadge difficulty={card.difficulty} />
+                  ) : (
+                    <span className="editor-item__nopts">No points</span>
+                  )}
                   <span className="editor-item__loc">{card.location}</span>
                 </span>
               </span>
@@ -312,22 +317,28 @@ function CardForm({
         </select>
       </div>
 
-      <div className="field">
-        <label htmlFor="diff">Difficulty</label>
-        <select
-          id="diff"
-          value={value.difficulty}
-          onChange={(e) =>
-            set("difficulty", e.target.value as Draft["difficulty"])
-          }
-        >
-          {DIFFICULTIES.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
-      </div>
+      {isScoringCategory(value.category) ? (
+        <div className="field">
+          <label htmlFor="diff">Difficulty</label>
+          <select
+            id="diff"
+            value={value.difficulty}
+            onChange={(e) =>
+              set("difficulty", e.target.value as Draft["difficulty"])
+            }
+          >
+            {DIFFICULTIES.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <p className="muted" style={{ fontSize: 12 }}>
+          {value.category} cards award no points — everyone just joins in.
+        </p>
+      )}
 
       <div className="field">
         <label htmlFor="loc">Location</label>

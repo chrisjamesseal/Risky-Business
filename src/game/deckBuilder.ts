@@ -1,6 +1,6 @@
 import {
   DIFFICULTIES,
-  SCORING_CATEGORIES,
+  isScoringCategory,
   type Card,
   type CardLocation,
   type Difficulty,
@@ -11,8 +11,8 @@ import { createRng, shuffle, type Rng } from "./random";
 export interface Deck {
   /** Scoring cards in play order (difficulty rises across the game). */
   scoring: Card[];
-  /** Shuffled chaos events to sprinkle between turns. */
-  chaos: Card[];
+  /** Shuffled non-scoring interludes (Group Rounds and Chaos Events). */
+  interludes: Card[];
 }
 
 const DIFFICULTY_INDEX: Record<Difficulty, number> = {
@@ -59,16 +59,14 @@ export function buildDeck(
   const rng = createRng(seed);
   const usable = enabledCardsForLocation(cards, location);
 
-  const scoringPool = usable.filter((c) =>
-    (SCORING_CATEGORIES as readonly string[]).includes(c.category),
-  );
-  const chaosPool = usable.filter((c) => c.category === "Chaos Event");
+  const scoringPool = usable.filter((c) => isScoringCategory(c.category));
+  const interludePool = usable.filter((c) => !isScoringCategory(c.category));
 
   const total = scoringCount + buffer;
   const scoring = pickWithRisingDifficulty(scoringPool, total, rng);
-  const chaos = shuffle(chaosPool, rng);
+  const interludes = shuffle(interludePool, rng);
 
-  return { scoring, chaos };
+  return { scoring, interludes };
 }
 
 /** Group cards by difficulty and shuffle each bucket. */

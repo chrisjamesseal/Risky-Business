@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.2.0";
+export const APP_VERSION = "1.3.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.3.0",
+    title: "Group Rounds",
+    changes: [
+      "New Group Round category — whole-group games and questions that award no points, so cards like Never Have I Ever and Would You Rather aren't forced into pass/fail",
+      "Moved the group-only games out of Mini Games and added new question rounds (Hot Seat, Most Likely To, This or That, Group Vote)",
+      "Group Rounds and Chaos Events now appear between turns as no-points interludes",
+    ],
+  },
   {
     version: "1.2.0",
     title: "Balance & Editor",
