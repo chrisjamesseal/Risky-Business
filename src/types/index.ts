@@ -1,42 +1,63 @@
 // Shared domain types for Risk It.
 
-export const CATEGORIES = [
-  "Truth",
-  "Dare",
-  "Challenge",
-  "Mini Game",
-  "Ongoing",
-  "Group Round",
-] as const;
-export type Category = (typeof CATEGORIES)[number];
-
 /**
- * Categories that award points and count as a scoring turn. Group Rounds are
- * non-scoring interludes — everyone joins in, nobody scores.
- *
- * Ongoing cards score too, but their points are deferred: the player starts
- * the task now and the group checks whether they kept it up at the player's
- * next turn.
+ * How a category plays out:
+ * - standard: the current player does it now and completes/fails for points.
+ * - mini:     the whole group plays, then you pick a winner who takes the points.
+ * - ongoing:  the player starts a task now; it's checked at their next turn.
+ * - group:    a non-scoring interlude — everyone joins in, nobody scores.
  */
-export const SCORING_CATEGORIES = [
-  "Truth",
-  "Dare",
-  "Challenge",
-  "Mini Game",
-  "Ongoing",
+export const CATEGORY_BEHAVIORS = [
+  "standard",
+  "mini",
+  "ongoing",
+  "group",
 ] as const;
-export type ScoringCategory = (typeof SCORING_CATEGORIES)[number];
+export type CategoryBehavior = (typeof CATEGORY_BEHAVIORS)[number];
 
-/** Non-scoring interlude categories, shown between scoring turns. */
-export const INTERLUDE_CATEGORIES = ["Group Round"] as const;
+export const BEHAVIOR_LABEL: Record<CategoryBehavior, string> = {
+  standard: "Do it now — score or miss",
+  mini: "Group game — pick the winner",
+  ongoing: "Ongoing task — checked next turn",
+  group: "Just for fun — no points",
+};
 
-export function isScoringCategory(category: Category): boolean {
-  return (SCORING_CATEGORIES as readonly string[]).includes(category);
+/** Categories are user-editable data, so a category name is just a string. */
+export type Category = string;
+
+/** A user-editable card category and how it behaves in a game. */
+export interface CategoryDef {
+  name: string;
+  behavior: CategoryBehavior;
+  icon: string;
+  color: string;
+  description: string;
 }
 
-/** Ongoing tasks are accepted now and scored at the player's next turn. */
-export function isOngoingCategory(category: Category): boolean {
-  return category === "Ongoing";
+/** Behaviours that award points (everything except a "group" round). */
+export function isScoringBehavior(behavior: CategoryBehavior): boolean {
+  return behavior !== "group";
+}
+
+/** Palette custom categories cycle through for their accent colour. */
+export const CATEGORY_COLORS = [
+  "var(--cyan)",
+  "var(--pink)",
+  "var(--yellow)",
+  "var(--green)",
+  "var(--orange)",
+  "var(--purple)",
+  "var(--red)",
+];
+
+export type BehaviorByCategory = Record<string, CategoryBehavior>;
+
+export function behaviorByCategory(
+  categories: readonly CategoryDef[],
+): BehaviorByCategory {
+  const map: BehaviorByCategory = {};
+  for (const c of categories) map[c.name] = c.behavior;
+  return map;
 }
 
 export const DIFFICULTIES = ["Easy", "Medium", "Hard", "Extreme"] as const;

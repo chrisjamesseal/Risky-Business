@@ -4,6 +4,7 @@ import {
   DIFFICULTY_POINTS,
   LOCATIONS,
   type Card,
+  type CategoryDef,
   type Difficulty,
   type GameLocation,
 } from "../types";
@@ -28,10 +29,12 @@ const DRINK_LADDER: { place: string; drinks: number }[] = [
 
 export function SetupScreen({
   cards,
+  categories,
   onStart,
   onBack,
 }: {
   cards: Card[];
+  categories: CategoryDef[];
   onStart: (config: {
     names: string[];
     location: GameLocation;
@@ -67,8 +70,8 @@ export function SetupScreen({
 
   // Scoring cards available for the chosen location + difficulties.
   const scoringCount = useMemo(
-    () => scoringCardsFor(cards, location, difficulties).length,
-    [cards, location, difficulties],
+    () => scoringCardsFor(cards, location, difficulties, categories).length,
+    [cards, location, difficulties, categories],
   );
 
   const start = () => {

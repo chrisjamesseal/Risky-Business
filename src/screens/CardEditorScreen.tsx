@@ -1,32 +1,24 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
+  BEHAVIOR_LABEL,
   CARD_LOCATIONS,
-  CATEGORIES,
+  CATEGORY_BEHAVIORS,
+  CATEGORY_COLORS,
   DIFFICULTIES,
-  isScoringCategory,
+  isScoringBehavior,
   type Card,
-  type Category,
+  type CategoryBehavior,
+  type CategoryDef,
 } from "../types";
-import {
-  Button,
-  CATEGORY_DESCRIPTION,
-  CATEGORY_ICON,
-  CATEGORY_SHORT,
-  DifficultyBadge,
-} from "../components/ui";
+import { Button, DifficultyBadge } from "../components/ui";
 import { GameCard } from "../components/GameCard";
+import { CategoriesProvider } from "../state/CategoriesContext";
 import { makeId, sanitizeCards } from "../storage/localStorage";
 
 type Draft = Omit<Card, "id"> & { id?: string };
 
-function blankDraft(category: Category): Draft {
-  return {
-    title: "",
-    description: "",
-    category,
-    difficulty: "Easy",
-    location: "All",
-  };
+function blankDraft(category: string): Draft {
+  return { title: "", description: "", category, difficulty: "Easy", location: "All" };
 }
 
 /** A single-select row of tappable options (used instead of dropdowns). */
@@ -34,10 +26,12 @@ function ChipSelect<T extends string>({
   options,
   value,
   onChange,
+  labels,
 }: {
   options: readonly T[];
   value: T;
   onChange: (v: T) => void;
+  labels?: Record<string, string>;
 }) {
   return (
     <div className="chip-row">
@@ -48,7 +42,7 @@ function ChipSelect<T extends string>({
           onClick={() => onChange(opt)}
           aria-pressed={value === opt}
         >
-          {opt}
+          {labels?.[opt] ?? opt}
         </button>
       ))}
     </div>
@@ -57,20 +51,32 @@ function ChipSelect<T extends string>({
 
 export function CardEditorScreen({
   cards,
+  categories,
   onChange,
+  onChangeCategories,
   onReset,
   onBack,
   onToast,
 }: {
   cards: Card[];
+  categories: CategoryDef[];
   onChange: (cards: Card[]) => void;
+  onChangeCategories: (categories: CategoryDef[]) => void;
   onReset: () => void;
   onBack: () => void;
   onToast: (message: string, error?: boolean) => void;
 }) {
-  const [filter, setFilter] = useState<Category>("Truth");
+  const [filterName, setFilterName] = useState(categories[0]?.name ?? "");
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [catDraft, setCatDraft] = useState<CatDraft | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  // Keep the active tab valid if categories change underneath us.
+  const filter =
+    categories.find((c) => c.name === filterName)?.name ??
+    categories[0]?.name ??
+    "";
+  const activeCategory = categories.find((c) => c.name === filter);
 
   const visible = useMemo(
     () => cards.filter((c) => c.category === filter),
@@ -84,9 +90,7 @@ export function CardEditorScreen({
     }
     if (value.id) {
       onChange(
-        cards.map((c) =>
-          c.id === value.id ? ({ ...value, id: value.id } as Card) : c,
-        ),
+        cards.map((c) => (c.id === value.id ? ({ ...value, id: value.id } as Card) : c)),
       );
     } else {
       onChange([...cards, { ...value, id: makeId() } as Card]);
@@ -95,11 +99,89 @@ export function CardEditorScreen({
     onToast("Card saved");
   };
 
-  const remove = (id: string) => {
+  const removeCard = (id: string) => {
     onChange(cards.filter((c) => c.id !== id));
     setDraft(null);
     onToast("Card deleted");
   };
+
+  // --- category management --------------------------------------------------
+
+  const saveCategory = (value: CatDraft) => {
+    const name = value.name.trim();
+    if (!name) {
+      onToast("Category needs a name", true);
+      return;
+    }
+    const clash = categories.some(
+      (c) => c.name === name && c.name !== value.originalName,
+    );
+    if (clash) {
+      onToast("A category with that name already exists", true);
+      return;
+    }
+    const def: CategoryDef = {
+      name,
+      behavior: value.behavior,
+      icon: value.icon.trim() || "🎴",
+      color: value.color,
+      description: value.description.trim(),
+    };
+
+    if (value.originalName) {
+      onChangeCategories(
+        categories.map((c) => (c.name === value.originalName ? def : c)),
+      );
+      // Re-point existing cards if the category was renamed.
+      if (name !== value.originalName) {
+        onChange(
+          cards.map((c) =>
+            c.category === value.originalName ? { ...c, category: name } : c,
+          ),
+        );
+      }
+    } else {
+      onChangeCategories([...categories, def]);
+    }
+    setFilterName(name);
+    setCatDraft(null);
+    onToast("Category saved");
+  };
+
+  const deleteCategory = (name: string) => {
+    const count = cards.filter((c) => c.category === name).length;
+    if (categories.length <= 1) {
+      onToast("Keep at least one category", true);
+      return;
+    }
+    if (
+      !window.confirm(
+        `Delete the "${name}" category and its ${count} card${count === 1 ? "" : "s"}?`,
+      )
+    ) {
+      return;
+    }
+    const remaining = categories.filter((c) => c.name !== name);
+    onChangeCategories(remaining);
+    onChange(cards.filter((c) => c.category !== name));
+    setFilterName(remaining[0]?.name ?? "");
+    setCatDraft(null);
+    onToast("Category deleted");
+  };
+
+  const newCategory = () => {
+    const used = new Set(categories.map((c) => c.color));
+    const color = CATEGORY_COLORS.find((c) => !used.has(c)) ?? CATEGORY_COLORS[0];
+    setCatDraft({
+      name: "",
+      behavior: "standard",
+      icon: "🎴",
+      color,
+      description: "",
+    });
+  };
+
+  // --- backup ---------------------------------------------------------------
 
   const exportCards = () => {
     const blob = new Blob([JSON.stringify(cards, null, 2)], {
@@ -117,9 +199,10 @@ export function CardEditorScreen({
   const importCards = async (file: File) => {
     try {
       const text = await file.text();
-      const parsed = sanitizeCards(JSON.parse(text));
+      const names = new Set(categories.map((c) => c.name));
+      const parsed = sanitizeCards(JSON.parse(text), names);
       if (!parsed) {
-        onToast("No valid cards in that file", true);
+        onToast("No cards matching your categories in that file", true);
         return;
       }
       onChange(parsed);
@@ -129,14 +212,32 @@ export function CardEditorScreen({
     }
   };
 
+  if (catDraft) {
+    return (
+      <CategoryForm
+        draft={catDraft}
+        onSave={saveCategory}
+        onCancel={() => setCatDraft(null)}
+        onDelete={
+          catDraft.originalName
+            ? () => deleteCategory(catDraft.originalName!)
+            : undefined
+        }
+      />
+    );
+  }
+
   if (draft) {
     return (
-      <CardForm
-        draft={draft}
-        onSave={upsert}
-        onCancel={() => setDraft(null)}
-        onDelete={draft.id ? () => remove(draft.id!) : undefined}
-      />
+      <CategoriesProvider categories={categories}>
+        <CardForm
+          draft={draft}
+          categories={categories}
+          onSave={upsert}
+          onCancel={() => setDraft(null)}
+          onDelete={draft.id ? () => removeCard(draft.id!) : undefined}
+        />
+      </CategoriesProvider>
     );
   }
 
@@ -150,23 +251,32 @@ export function CardEditorScreen({
       </div>
 
       <div className="cat-tabs">
-        {CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <button
-            key={cat}
-            className={"cat-tab" + (filter === cat ? " cat-tab--active" : "")}
-            onClick={() => setFilter(cat)}
-            aria-pressed={filter === cat}
+            key={cat.name}
+            className={"cat-tab" + (filter === cat.name ? " cat-tab--active" : "")}
+            onClick={() => setFilterName(cat.name)}
+            aria-pressed={filter === cat.name}
           >
-            <span className="cat-tab__icon">{CATEGORY_ICON[cat]}</span>
-            <span className="cat-tab__label">{CATEGORY_SHORT[cat]}</span>
+            <span className="cat-tab__icon">{cat.icon}</span>
+            <span className="cat-tab__label">{cat.name}</span>
           </button>
         ))}
       </div>
 
-      <p className="cat-desc">{CATEGORY_DESCRIPTION[filter]}</p>
+      {activeCategory && <p className="cat-desc">{activeCategory.description}</p>}
+
+      <div className="btn-row">
+        <Button variant="ghost" onClick={() => activeCategory && setCatDraft({ ...activeCategory, originalName: activeCategory.name })}>
+          ✎ Edit category
+        </Button>
+        <Button variant="ghost" onClick={newCategory}>
+          + New category
+        </Button>
+      </div>
 
       <Button variant="primary" block onClick={() => setDraft(blankDraft(filter))}>
-        + Add {filter}
+        + Add {filter} card
       </Button>
 
       <div className="stack--sm">
@@ -184,7 +294,7 @@ export function CardEditorScreen({
               </span>
               <span className="editor-item__desc">{card.description}</span>
               <span className="editor-item__meta">
-                {isScoringCategory(card.category) ? (
+                {activeCategory && isScoringBehavior(activeCategory.behavior) ? (
                   <DifficultyBadge difficulty={card.difficulty} />
                 ) : (
                   <span className="editor-item__nopts">No points</span>
@@ -207,7 +317,7 @@ export function CardEditorScreen({
         </Button>
       </div>
       <Button variant="danger" block onClick={onReset}>
-        ↺ Reset Cards to Default
+        ↺ Reset to Default
       </Button>
       <input
         ref={fileInput}
@@ -224,13 +334,116 @@ export function CardEditorScreen({
   );
 }
 
-function CardForm({
+// --------------------------------------------------------------- Category form
+
+interface CatDraft extends CategoryDef {
+  originalName?: string;
+}
+
+function CategoryForm({
   draft,
   onSave,
   onCancel,
   onDelete,
 }: {
+  draft: CatDraft;
+  onSave: (draft: CatDraft) => void;
+  onCancel: () => void;
+  onDelete?: () => void;
+}) {
+  const [value, setValue] = useState<CatDraft>(draft);
+  const set = <K extends keyof CatDraft>(key: K, v: CatDraft[K]) =>
+    setValue((prev) => ({ ...prev, [key]: v }));
+
+  return (
+    <div className="screen">
+      <div className="topbar">
+        <button className="icon-btn" onClick={onCancel} aria-label="Cancel">
+          ←
+        </button>
+        <h2>{draft.originalName ? "Edit Category" : "New Category"}</h2>
+      </div>
+
+      <div className="field">
+        <label htmlFor="cname">Name</label>
+        <input
+          id="cname"
+          type="text"
+          value={value.name}
+          maxLength={20}
+          autoFocus
+          onChange={(e) => set("name", e.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="cicon">Icon (emoji)</label>
+        <input
+          id="cicon"
+          type="text"
+          value={value.icon}
+          maxLength={2}
+          onChange={(e) => set("icon", e.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label>How it plays</label>
+        <div className="chip-col">
+          {CATEGORY_BEHAVIORS.map((b) => (
+            <button
+              key={b}
+              className={"chip" + (value.behavior === b ? " chip--active" : "")}
+              onClick={() => set("behavior", b as CategoryBehavior)}
+              aria-pressed={value.behavior === b}
+            >
+              {BEHAVIOR_LABEL[b]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="field">
+        <label htmlFor="cdesc">Description</label>
+        <input
+          id="cdesc"
+          type="text"
+          value={value.description}
+          maxLength={120}
+          onChange={(e) => set("description", e.target.value)}
+        />
+      </div>
+
+      {onDelete && (
+        <Button variant="danger" onClick={onDelete}>
+          🗑 Delete category &amp; its cards
+        </Button>
+      )}
+
+      <div className="spacer" />
+      <div className="btn-row">
+        <Button variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={() => onSave(value)}>
+          Save
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------- Card form
+
+function CardForm({
+  draft,
+  categories,
+  onSave,
+  onCancel,
+  onDelete,
+}: {
   draft: Draft;
+  categories: CategoryDef[];
   onSave: (draft: Draft) => void;
   onCancel: () => void;
   onDelete?: () => void;
@@ -239,7 +452,11 @@ function CardForm({
   const set = <K extends keyof Draft>(key: K, v: Draft[K]) =>
     setValue((prev) => ({ ...prev, [key]: v }));
 
-  // Grow the description box to fit its text so the whole prompt is visible.
+  const behavior =
+    categories.find((c) => c.name === value.category)?.behavior ?? "standard";
+  const scoring = isScoringBehavior(behavior);
+  const categoryNames = categories.map((c) => c.name);
+
   const descRef = useRef<HTMLTextAreaElement>(null);
   useLayoutEffect(() => {
     const el = descRef.current;
@@ -304,14 +521,13 @@ function CardForm({
       <div className="field">
         <label>Category</label>
         <ChipSelect
-          options={CATEGORIES}
+          options={categoryNames}
           value={value.category}
           onChange={(c) => set("category", c)}
         />
-        <span className="field__hint">{CATEGORY_DESCRIPTION[value.category]}</span>
       </div>
 
-      {isScoringCategory(value.category) ? (
+      {scoring ? (
         <div className="field">
           <label>Difficulty</label>
           <ChipSelect
@@ -322,7 +538,7 @@ function CardForm({
         </div>
       ) : (
         <p className="muted" style={{ fontSize: 12 }}>
-          {value.category} cards award no points — everyone just joins in.
+          {value.category} cards award no points.
         </p>
       )}
 

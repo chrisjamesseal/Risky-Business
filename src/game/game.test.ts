@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CARDS } from "../data/defaultCards";
+import { DEFAULT_CATEGORIES } from "../data/categories";
 import {
   buildDeck,
   cardsForLocation,
@@ -15,17 +16,21 @@ import {
   type NewGameConfig,
 } from "./gameReducer";
 import {
-  CATEGORIES,
+  behaviorByCategory,
   DIFFICULTIES,
-  isScoringCategory,
+  isScoringBehavior,
   LOCATIONS,
-  SCORING_CATEGORIES,
   SCORING_TURNS_PER_PLAYER,
   type Card,
+  type CategoryDef,
   type Player,
 } from "../types";
 
-/** Base game config for tests; every difficulty included by default. */
+const BEHAVIOR = behaviorByCategory(DEFAULT_CATEGORIES);
+const scores = (category: string) =>
+  BEHAVIOR[category] !== undefined && isScoringBehavior(BEHAVIOR[category]);
+
+/** Base game config for tests; every difficulty and default categories. */
 function gameConfig(overrides: Partial<NewGameConfig>): NewGameConfig {
   return {
     names: ["A", "B"],
@@ -33,6 +38,7 @@ function gameConfig(overrides: Partial<NewGameConfig>): NewGameConfig {
     drinkMode: false,
     difficulties: [...DIFFICULTIES],
     cards: DEFAULT_CARDS,
+    categories: DEFAULT_CATEGORIES,
     ...overrides,
   };
 }
@@ -69,10 +75,10 @@ describe("location filtering", () => {
   });
 
   it("filters scoring cards by the chosen difficulties", () => {
-    const easyOnly = scoringCardsFor(DEFAULT_CARDS, "Home", ["Easy"]);
+    const easyOnly = scoringCardsFor(DEFAULT_CARDS, "Home", ["Easy"], DEFAULT_CATEGORIES);
     expect(easyOnly.length).toBeGreaterThan(0);
     expect(easyOnly.every((c) => c.difficulty === "Easy")).toBe(true);
-    const hardOnly = scoringCardsFor(DEFAULT_CARDS, "Home", ["Hard"]);
+    const hardOnly = scoringCardsFor(DEFAULT_CARDS, "Home", ["Hard"], DEFAULT_CATEGORIES);
     expect(hardOnly.every((c) => c.difficulty === "Hard")).toBe(true);
   });
 });
@@ -81,7 +87,7 @@ describe("default library balance", () => {
   it("has Group Round cards, and they are non-scoring", () => {
     const rounds = DEFAULT_CARDS.filter((c) => c.category === "Group Round");
     expect(rounds.length).toBeGreaterThan(0);
-    expect(rounds.every((c) => !isScoringCategory(c.category))).toBe(true);
+    expect(rounds.every((c) => !scores(c.category))).toBe(true);
     // Group-only games must not linger as scoring Mini Games.
     const titles = DEFAULT_CARDS.filter(
       (c) => c.category === "Mini Game",
@@ -112,7 +118,7 @@ describe("default library balance", () => {
     const needed = 8 * SCORING_TURNS_PER_PLAYER; // 40
     for (const location of LOCATIONS) {
       const scoring = cardsForLocation(DEFAULT_CARDS, location).filter((c) =>
-        (SCORING_CATEGORIES as readonly string[]).includes(c.category),
+        scores(c.category),
       );
       expect(scoring.length).toBeGreaterThanOrEqual(needed);
     }
@@ -126,17 +132,18 @@ describe("deck builds for every player count and location", () => {
       for (const location of LOCATIONS) {
         const deck = buildDeck(
           DEFAULT_CARDS,
+          DEFAULT_CATEGORIES,
           location,
           scoringNeeded,
           players,
           players, // deterministic seed
         );
         expect(deck.scoring.length).toBe(scoringNeeded + players);
-        expect(deck.scoring.every((c) => isScoringCategory(c.category))).toBe(
+        expect(deck.scoring.every((c) => scores(c.category))).toBe(
           true,
         );
         expect(
-          deck.interludes.every((c) => !isScoringCategory(c.category)),
+          deck.interludes.every((c) => !scores(c.category)),
         ).toBe(true);
       }
     }
@@ -145,13 +152,13 @@ describe("deck builds for every player count and location", () => {
 
 describe("buildDeck", () => {
   it("returns exactly the requested number of scoring cards plus buffer", () => {
-    const deck = buildDeck(DEFAULT_CARDS, "Home", 40, 8, 123);
+    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 40, 8, 123);
     expect(deck.scoring.length).toBe(48);
-    expect(deck.scoring.every((c) => isScoringCategory(c.category))).toBe(true);
+    expect(deck.scoring.every((c) => scores(c.category))).toBe(true);
   });
 
   it("puts Group Rounds in the interlude pool, not the scoring deck", () => {
-    const deck = buildDeck(DEFAULT_CARDS, "Home", 20, 0, 3);
+    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 20, 0, 3);
     expect(deck.interludes.every((c) => c.category === "Group Round")).toBe(
       true,
     );
@@ -162,7 +169,7 @@ describe("buildDeck", () => {
   });
 
   it("only includes location-appropriate cards", () => {
-    const deck = buildDeck(DEFAULT_CARDS, "Pub", 20, 0, 7);
+    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Pub", 20, 0, 7);
     for (const card of [...deck.scoring, ...deck.interludes]) {
       expect(["Pub", "All"]).toContain(card.location);
     }
@@ -170,7 +177,7 @@ describe("buildDeck", () => {
 
   it("trends from easier to harder over the game", () => {
     const points = { Easy: 1, Medium: 2, Hard: 3, Extreme: 4 } as const;
-    const deck = buildDeck(DEFAULT_CARDS, "Home", 40, 0, 99);
+    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 40, 0, 99);
     const firstHalf = deck.scoring.slice(0, 20);
     const secondHalf = deck.scoring.slice(20);
     const avg = (cards: Card[]) =>
@@ -179,9 +186,24 @@ describe("buildDeck", () => {
   });
 
   it("is deterministic for a given seed", () => {
-    const a = buildDeck(DEFAULT_CARDS, "Home", 20, 4, 42);
-    const b = buildDeck(DEFAULT_CARDS, "Home", 20, 4, 42);
+    const a = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 20, 4, 42);
+    const b = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 20, 4, 42);
     expect(a.scoring.map((c) => c.id)).toEqual(b.scoring.map((c) => c.id));
+  });
+
+  it("routes custom categories by their behaviour", () => {
+    const cats: CategoryDef[] = [
+      { name: "Q", behavior: "standard", icon: "?", color: "", description: "" },
+      { name: "Fun", behavior: "group", icon: "!", color: "", description: "" },
+    ];
+    const cards: Card[] = [
+      { id: "q1", title: "q", description: "d", category: "Q", difficulty: "Easy", location: "All" },
+      { id: "f1", title: "f", description: "d", category: "Fun", difficulty: "Easy", location: "All" },
+    ];
+    const deck = buildDeck(cards, cats, "Home", 4, 0, 1);
+    expect(deck.scoring.every((c) => c.category === "Q")).toBe(true);
+    expect(deck.interludes.every((c) => c.category === "Fun")).toBe(true);
+    expect(deck.interludes.length).toBe(1);
   });
 });
 
@@ -241,16 +263,16 @@ describe("game reducer", () => {
     const state = gameReducer(createGame(config), { type: "REVEAL", roll: 0.9 });
     expect(state.phase).toBe("card");
     expect(state.currentCard).not.toBeNull();
-    expect(isScoringCategory(state.currentCard!.category)).toBe(true);
+    expect(scores(state.currentCard!.category)).toBe(true);
   });
 
   it("shows a non-scoring interlude first when roll is low", () => {
     const state = gameReducer(createGame(config), { type: "REVEAL", roll: 0 });
     expect(state.phase).toBe("interlude");
     expect(state.pendingInterlude).not.toBeNull();
-    expect(isScoringCategory(state.pendingInterlude!.category)).toBe(false);
+    expect(scores(state.pendingInterlude!.category)).toBe(false);
     // The scoring card is queued behind it and never awards points itself.
-    expect(isScoringCategory(state.currentCard!.category)).toBe(true);
+    expect(scores(state.currentCard!.category)).toBe(true);
   });
 
   it("awards points on complete and advances the player", () => {
@@ -324,9 +346,9 @@ describe("game reducer", () => {
 
 describe("chaos removed", () => {
   it("has no Chaos Event cards or category", () => {
-    expect(CATEGORIES as readonly string[]).not.toContain("Chaos Event");
+    expect(DEFAULT_CATEGORIES.map((c) => c.name)).not.toContain("Chaos Event");
     expect(
-      DEFAULT_CARDS.some((c) => (c.category as string) === "Chaos Event"),
+      DEFAULT_CARDS.some((c) => c.category === "Chaos Event"),
     ).toBe(false);
   });
 });
@@ -344,7 +366,7 @@ describe("Mini Games (winner picks up the points)", () => {
   it("has default Mini Games, and they are scoring", () => {
     const games = DEFAULT_CARDS.filter((c) => c.category === "Mini Game");
     expect(games.length).toBeGreaterThan(0);
-    expect(games.every((c) => isScoringCategory(c.category))).toBe(true);
+    expect(games.every((c) => scores(c.category))).toBe(true);
     // The old solo mini-games moved out.
     expect(games.map((c) => c.title)).not.toContain("Coaster Toss");
   });
@@ -386,7 +408,7 @@ describe("Ongoing tasks", () => {
   it("has Ongoing cards, and they are scoring", () => {
     const ongoing = DEFAULT_CARDS.filter((c) => c.category === "Ongoing");
     expect(ongoing.length).toBeGreaterThan(0);
-    expect(ongoing.every((c) => isScoringCategory(c.category))).toBe(true);
+    expect(ongoing.every((c) => scores(c.category))).toBe(true);
   });
 
   // A deck where every scoring card is an Ongoing "Accent" task.

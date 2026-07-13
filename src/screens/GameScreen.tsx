@@ -31,8 +31,11 @@ export function GameScreen({
   );
   const doubled = player.doublePointsArmed;
   const stake = state.currentCard ? cardPoints(state.currentCard, doubled) : 0;
-  const isOngoing = state.currentCard?.category === "Ongoing";
-  const isMini = state.currentCard?.category === "Mini Game";
+  const currentBehavior = state.currentCard
+    ? state.behavior[state.currentCard.category]
+    : undefined;
+  const isOngoing = currentBehavior === "ongoing";
+  const isMini = currentBehavior === "mini";
 
   const quit = () => {
     if (window.confirm("Quit the game? All scores will be lost.")) onQuit();
