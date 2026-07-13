@@ -19,16 +19,21 @@ export function ResultsScreen({
   const ranked = rankedPlayers(players);
   const positions = finishingPositions(players);
   const drinks = drinksByPlayer(players);
-  const winner = ranked[0];
+
+  // Everyone sharing top spot (handles ties for the win).
+  const topScore = ranked[0].score;
+  const winners = ranked.filter((p) => p.score === topScore);
+  const headline =
+    winners.length > 1
+      ? `🤝 It's a tie at ${topScore}!`
+      : `👑 ${winners[0].name} wins with ${topScore}!`;
 
   return (
     <div className="screen">
       <h1 className="logo" style={{ fontSize: 30 }}>
         Results
       </h1>
-      <p className="tagline">
-        👑 {winner.name} wins with {winner.score}!
-      </p>
+      <p className="tagline">{headline}</p>
 
       <div className="podium">
         {ranked.map((player) => {

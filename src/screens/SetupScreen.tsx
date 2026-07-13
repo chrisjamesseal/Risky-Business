@@ -89,6 +89,7 @@ export function SetupScreen({
               type="text"
               value={name}
               maxLength={16}
+              autoFocus={index === 0}
               placeholder={`Player ${index + 1}`}
               onChange={(e) => setName(index, e.target.value)}
             />
@@ -113,14 +114,16 @@ export function SetupScreen({
 
       <div className="stack--sm">
         <div className="section-title">Location</div>
-        <div className="chip-row">
+        <div className="loc-list">
           {LOCATIONS.map((loc) => (
             <button
               key={loc}
-              className={"chip" + (location === loc ? " chip--active" : "")}
+              className={"loc-option" + (location === loc ? " loc-option--active" : "")}
               onClick={() => setLocation(loc)}
+              aria-pressed={location === loc}
             >
-              {LOCATION_ICON[loc]} {loc}
+              <span className="loc-option__icon">{LOCATION_ICON[loc]}</span>
+              <span className="loc-option__name">{loc}</span>
             </button>
           ))}
         </div>
@@ -136,7 +139,7 @@ export function SetupScreen({
           onClick={() => setDrinkMode((v) => !v)}
           aria-pressed={drinkMode}
         >
-          <span>🍺 Drinks at the end</span>
+          <span>🍺&nbsp; Drinks at the end</span>
           <span
             className={`toggle__state toggle__state--${drinkMode ? "on" : "off"}`}
           >

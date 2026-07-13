@@ -6,7 +6,7 @@ import {
   type Card,
   type Category,
 } from "../types";
-import { Button, CATEGORY_ICON } from "../components/ui";
+import { Button, CATEGORY_ICON, CATEGORY_SHORT } from "../components/ui";
 import { makeId, sanitizeCards } from "../storage/localStorage";
 
 type Draft = Omit<Card, "id"> & { id?: string };
@@ -127,15 +127,16 @@ export function CardEditorScreen({
         <h2>Card Editor</h2>
       </div>
 
-      <div className="chip-row">
+      <div className="cat-tabs">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
-            className={"chip" + (filter === cat ? " chip--active" : "")}
+            className={"cat-tab" + (filter === cat ? " cat-tab--active" : "")}
             onClick={() => setFilter(cat)}
-            title={cat}
+            aria-pressed={filter === cat}
           >
-            {CATEGORY_ICON[cat]}
+            <span className="cat-tab__icon">{CATEGORY_ICON[cat]}</span>
+            <span className="cat-tab__label">{CATEGORY_SHORT[cat]}</span>
           </button>
         ))}
       </div>
