@@ -340,11 +340,12 @@ select:focus {
 /* Card editor category tabs — icon plus a short label. */
 .cat-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
 .cat-tab {
-  flex: 1;
+  flex: 1 1 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -453,6 +454,15 @@ select:focus {
   );
   border-color: var(--pink);
   animation: chaos-shake 0.4s steps(2, end) 2;
+}
+
+.game-card--round {
+  background: linear-gradient(160deg, #2b1f52, #201641);
+  border-color: var(--purple);
+}
+.game-card--round .game-card__points {
+  color: var(--purple);
+  border-color: var(--purple);
 }
 
 .diff-badge {
@@ -787,6 +797,15 @@ select:focus {
 .editor-item__loc {
   font-size: 11px;
   color: var(--ink-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.editor-item__nopts {
+  font-size: 11px;
+  color: var(--border);
+  background: var(--purple);
+  border: 3px solid var(--border);
+  padding: 2px 6px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }

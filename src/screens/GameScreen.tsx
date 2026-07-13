@@ -109,13 +109,16 @@ export function GameScreen({
           </div>
         )}
 
-        {state.phase === "chaos" && state.pendingChaos && (
+        {state.phase === "interlude" && state.pendingInterlude && (
           <div className="stack">
-            <GameCard card={state.pendingChaos} />
+            <GameCard card={state.pendingInterlude} />
+            <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
+              Everyone joins in — no points. Then {player.name}'s card.
+            </p>
             <Button
               variant="secondary"
               block
-              onClick={() => dispatch({ type: "CONTINUE_CHAOS" })}
+              onClick={() => dispatch({ type: "CONTINUE_INTERLUDE" })}
             >
               Continue →
             </Button>

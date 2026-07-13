@@ -9,6 +9,7 @@ import { cardPoints, finishingPositions, rankedPlayers } from "./scoring";
 import { drinksForPosition } from "./drinks";
 import { createGame, gameReducer, type GameState } from "./gameReducer";
 import {
+  isScoringCategory,
   LOCATIONS,
   SCORING_CATEGORIES,
   SCORING_TURNS_PER_PLAYER,
@@ -48,6 +49,18 @@ describe("location filtering", () => {
 });
 
 describe("default library balance", () => {
+  it("has Group Round cards, and they are non-scoring", () => {
+    const rounds = DEFAULT_CARDS.filter((c) => c.category === "Group Round");
+    expect(rounds.length).toBeGreaterThan(0);
+    expect(rounds.every((c) => !isScoringCategory(c.category))).toBe(true);
+    // Group-only games must not linger as scoring Mini Games.
+    const titles = DEFAULT_CARDS.filter(
+      (c) => c.category === "Mini Game",
+    ).map((c) => c.title);
+    expect(titles).not.toContain("Never Have I Ever");
+    expect(titles).not.toContain("Would You Rather");
+  });
+
   it("keeps truths at Easy or Medium so big points require action cards", () => {
     const truths = DEFAULT_CARDS.filter((c) => c.category === "Truth");
     expect(truths.length).toBeGreaterThan(0);
@@ -90,10 +103,12 @@ describe("deck builds for every player count and location", () => {
           players, // deterministic seed
         );
         expect(deck.scoring.length).toBe(scoringNeeded + players);
+        expect(deck.scoring.every((c) => isScoringCategory(c.category))).toBe(
+          true,
+        );
         expect(
-          deck.scoring.every((c) => c.category !== "Chaos Event"),
+          deck.interludes.every((c) => !isScoringCategory(c.category)),
         ).toBe(true);
-        expect(deck.chaos.every((c) => c.category === "Chaos Event")).toBe(true);
       }
     }
   });
@@ -103,12 +118,20 @@ describe("buildDeck", () => {
   it("returns exactly the requested number of scoring cards plus buffer", () => {
     const deck = buildDeck(DEFAULT_CARDS, "Home", 40, 8, 123);
     expect(deck.scoring.length).toBe(48);
-    expect(deck.scoring.every((c) => c.category !== "Chaos Event")).toBe(true);
+    expect(deck.scoring.every((c) => isScoringCategory(c.category))).toBe(true);
+  });
+
+  it("puts Group Rounds and Chaos Events in the interlude pool", () => {
+    const deck = buildDeck(DEFAULT_CARDS, "Home", 20, 0, 3);
+    const categories = new Set(deck.interludes.map((c) => c.category));
+    expect(categories.has("Group Round")).toBe(true);
+    expect(categories.has("Chaos Event")).toBe(true);
+    expect(deck.scoring.some((c) => c.category === "Group Round")).toBe(false);
   });
 
   it("only includes location-appropriate cards", () => {
     const deck = buildDeck(DEFAULT_CARDS, "Pub", 20, 0, 7);
-    for (const card of [...deck.scoring, ...deck.chaos]) {
+    for (const card of [...deck.scoring, ...deck.interludes]) {
       expect(["Pub", "All"]).toContain(card.location);
     }
   });
@@ -188,16 +211,20 @@ describe("game reducer", () => {
     expect(state.phase).toBe("ready");
   });
 
-  it("reveals a scoring card without chaos when roll is high", () => {
+  it("reveals a scoring card without an interlude when roll is high", () => {
     const state = gameReducer(createGame(config), { type: "REVEAL", roll: 0.9 });
     expect(state.phase).toBe("card");
     expect(state.currentCard).not.toBeNull();
+    expect(isScoringCategory(state.currentCard!.category)).toBe(true);
   });
 
-  it("shows a chaos event first when roll is low", () => {
+  it("shows a non-scoring interlude first when roll is low", () => {
     const state = gameReducer(createGame(config), { type: "REVEAL", roll: 0 });
-    expect(state.phase).toBe("chaos");
-    expect(state.pendingChaos?.category).toBe("Chaos Event");
+    expect(state.phase).toBe("interlude");
+    expect(state.pendingInterlude).not.toBeNull();
+    expect(isScoringCategory(state.pendingInterlude!.category)).toBe(false);
+    // The scoring card is queued behind it and never awards points itself.
+    expect(isScoringCategory(state.currentCard!.category)).toBe(true);
   });
 
   it("awards points on complete and advances the player", () => {
@@ -252,9 +279,10 @@ describe("game reducer", () => {
     let guard = 0;
     while (!state.finished && guard++ < 1000) {
       if (state.phase === "ready") {
-        state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
-      } else if (state.phase === "chaos") {
-        state = gameReducer(state, { type: "CONTINUE_CHAOS" });
+        // roll 0 forces interludes so this path is exercised too
+        state = gameReducer(state, { type: "REVEAL", roll: 0 });
+      } else if (state.phase === "interlude") {
+        state = gameReducer(state, { type: "CONTINUE_INTERLUDE" });
       } else if (state.phase === "card") {
         state = gameReducer(state, { type: "COMPLETE" });
       } else if (state.phase === "result") {
