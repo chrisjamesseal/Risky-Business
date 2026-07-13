@@ -296,6 +296,82 @@ select:focus {
   background: var(--panel);
   border: 3px solid var(--border);
   padding: 12px 14px;
+  width: 100%;
+  font-family: var(--font);
+  font-weight: 700;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Location picker — full-width rows so long labels never clip. */
+.loc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loc-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  background: var(--panel);
+  border: 3px solid var(--border);
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.loc-option__icon {
+  font-size: 20px;
+}
+
+.loc-option--active {
+  color: var(--border);
+  background: var(--cyan);
+}
+
+/* Card editor category tabs — icon plus a short label. */
+.cat-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.cat-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font);
+  font-weight: 700;
+  color: var(--ink-dim);
+  background: var(--panel);
+  border: 3px solid var(--border);
+  padding: 8px 2px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.cat-tab__icon {
+  font-size: 18px;
+}
+
+.cat-tab__label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.cat-tab--active {
+  color: var(--border);
+  background: var(--cyan);
 }
 
 .toggle__state {
@@ -444,6 +520,36 @@ select:focus {
   flex-direction: column;
   justify-content: center;
   gap: 14px;
+}
+
+/* Pass-the-phone handoff (ready phase). */
+.handoff {
+  text-align: center;
+  align-items: center;
+}
+.handoff__icon {
+  font-size: 40px;
+  animation: pop 0.3s steps(4, end);
+}
+.handoff__label {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin: 0;
+}
+.handoff__name {
+  font-size: 30px;
+  color: var(--pink);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 2px 0 0;
+  text-shadow: 2px 2px 0 var(--border);
+}
+.handoff__hint {
+  font-size: 12px;
+  min-height: 16px;
+  margin: 4px 0 8px;
 }
 
 .award {
@@ -605,6 +711,30 @@ select:focus {
 }
 .icon-btn:active {
   transform: translate(2px, 2px);
+}
+
+/* How to Play blocks. */
+.help-block {
+  background: var(--panel);
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 12px 14px;
+}
+.help-block__title {
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 6px;
+}
+.help-block p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.help-block b {
+  color: var(--yellow);
 }
 
 .stack {

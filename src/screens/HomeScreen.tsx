@@ -3,9 +3,11 @@ import { Button } from "../components/ui";
 export function HomeScreen({
   onNewGame,
   onSettings,
+  onHelp,
 }: {
   onNewGame: () => void;
   onSettings: () => void;
+  onHelp: () => void;
 }) {
   return (
     <div className="screen screen--center">
@@ -22,6 +24,9 @@ export function HomeScreen({
         </Button>
         <Button variant="secondary" block onClick={onSettings}>
           ⚙ Settings
+        </Button>
+        <Button variant="ghost" block onClick={onHelp}>
+          ? How to Play
         </Button>
 
         <p className="tagline" style={{ marginTop: 18 }}>

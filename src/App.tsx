@@ -10,13 +10,21 @@ import {
 } from "./storage/localStorage";
 import { Toast } from "./components/ui";
 import { HomeScreen } from "./screens/HomeScreen";
+import { HelpScreen } from "./screens/HelpScreen";
 import { SetupScreen } from "./screens/SetupScreen";
 import { GameScreen } from "./screens/GameScreen";
 import { ResultsScreen } from "./screens/ResultsScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { CardEditorScreen } from "./screens/CardEditorScreen";
 
-type Screen = "home" | "setup" | "game" | "results" | "settings" | "editor";
+type Screen =
+  | "home"
+  | "setup"
+  | "game"
+  | "results"
+  | "settings"
+  | "editor"
+  | "help";
 
 interface Results {
   players: Player[];
@@ -76,8 +84,11 @@ export function App() {
         <HomeScreen
           onNewGame={() => setScreen("setup")}
           onSettings={() => setScreen("settings")}
+          onHelp={() => setScreen("help")}
         />
       )}
+
+      {screen === "help" && <HelpScreen onBack={() => setScreen("home")} />}
 
       {screen === "setup" && (
         <SetupScreen

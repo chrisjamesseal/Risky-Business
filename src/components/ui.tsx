@@ -52,6 +52,14 @@ export const CATEGORY_ICON: Record<Category, string> = {
   "Chaos Event": "💥",
 };
 
+export const CATEGORY_SHORT: Record<Category, string> = {
+  Truth: "Truth",
+  Dare: "Dare",
+  Challenge: "Chal",
+  "Mini Game": "Mini",
+  "Chaos Event": "Chaos",
+};
+
 export const CATEGORY_COLOR: Record<Category, string> = {
   Truth: "var(--cyan)",
   Dare: "var(--pink)",

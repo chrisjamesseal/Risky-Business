@@ -7,6 +7,7 @@ import {
   gameReducer,
   type NewGameConfig,
 } from "../game/gameReducer";
+import { cardPoints } from "../game/scoring";
 import { SCORING_TURNS_PER_PLAYER, type Player } from "../types";
 
 export function GameScreen({
@@ -28,11 +29,18 @@ export function GameScreen({
   const everyoneDoneAfterThis = state.players.every(
     (p) => p.scoringTurnsCompleted >= SCORING_TURNS_PER_PLAYER,
   );
+  const stake = state.currentCard
+    ? cardPoints(state.currentCard, player.doublePointsArmed)
+    : 0;
+
+  const quit = () => {
+    if (window.confirm("Quit the game? All scores will be lost.")) onQuit();
+  };
 
   return (
     <div className="screen" style={{ paddingBottom: 0 }}>
       <div className="topbar">
-        <button className="icon-btn" onClick={onQuit} aria-label="Quit game">
+        <button className="icon-btn" onClick={quit} aria-label="Quit game">
           ←
         </button>
         <div className="spacer" />
@@ -75,14 +83,19 @@ export function GameScreen({
 
       <div className="game-body">
         {state.phase === "ready" && (
-          <div className="stack" style={{ textAlign: "center" }}>
-            <p className="muted">
-              Turn {player.scoringTurnsCompleted + 1} of{" "}
-              {SCORING_TURNS_PER_PLAYER}
-            </p>
-            {player.doublePointsArmed && (
-              <p style={{ color: "var(--yellow)" }}>
-                Double Points armed — next card scores ×2!
+          <div className="stack handoff">
+            <div className="handoff__icon">📲</div>
+            <p className="handoff__label">Pass the phone to</p>
+            <p className="handoff__name">{player.name}</p>
+            {player.doublePointsArmed ? (
+              <p className="handoff__hint" style={{ color: "var(--yellow)" }}>
+                ×2 armed — this card scores double!
+              </p>
+            ) : (
+              <p className="handoff__hint muted">
+                {player.doublePointsUsed
+                  ? " "
+                  : "Tip: tap ×2 first to double this card"}
               </p>
             )}
             <Button
@@ -120,13 +133,13 @@ export function GameScreen({
                 variant="success"
                 onClick={() => dispatch({ type: "COMPLETE" })}
               >
-                ✓ Complete
+                ✓ Done +{stake}
               </Button>
               <Button
                 variant="danger"
                 onClick={() => dispatch({ type: "FAIL" })}
               >
-                ✗ Fail
+                ✗ Fail · 0
               </Button>
             </div>
           </div>
