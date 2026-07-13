@@ -8,7 +8,13 @@ import {
 import { cardPoints, finishingPositions, rankedPlayers } from "./scoring";
 import { drinksForPosition } from "./drinks";
 import { createGame, gameReducer, type GameState } from "./gameReducer";
-import { SCORING_TURNS_PER_PLAYER, type Card, type Player } from "../types";
+import {
+  LOCATIONS,
+  SCORING_CATEGORIES,
+  SCORING_TURNS_PER_PLAYER,
+  type Card,
+  type Player,
+} from "../types";
 
 function player(overrides: Partial<Player> = {}): Player {
   return {
@@ -38,6 +44,58 @@ describe("location filtering", () => {
     const usable = enabledCardsForLocation(cards, "Home");
     expect(usable.every((c) => c.enabled)).toBe(true);
     expect(usable.length).toBe(1);
+  });
+});
+
+describe("default library balance", () => {
+  it("keeps truths at Easy or Medium so big points require action cards", () => {
+    const truths = DEFAULT_CARDS.filter((c) => c.category === "Truth");
+    expect(truths.length).toBeGreaterThan(0);
+    for (const t of truths) {
+      expect(["Easy", "Medium"]).toContain(t.difficulty);
+    }
+  });
+
+  it("every location offers an Extreme action card for late-game turns", () => {
+    for (const location of LOCATIONS) {
+      const usable = enabledCardsForLocation(DEFAULT_CARDS, location);
+      const extreme = usable.filter(
+        (c) => c.difficulty === "Extreme" && c.category !== "Truth",
+      );
+      expect(extreme.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("every location has enough scoring cards for an 8-player game", () => {
+    const needed = 8 * SCORING_TURNS_PER_PLAYER; // 40
+    for (const location of LOCATIONS) {
+      const scoring = enabledCardsForLocation(DEFAULT_CARDS, location).filter(
+        (c) => (SCORING_CATEGORIES as readonly string[]).includes(c.category),
+      );
+      expect(scoring.length).toBeGreaterThanOrEqual(needed);
+    }
+  });
+});
+
+describe("deck builds for every player count and location", () => {
+  it("returns the right deck for 2 through 8 players everywhere", () => {
+    for (let players = 2; players <= 8; players++) {
+      const scoringNeeded = players * SCORING_TURNS_PER_PLAYER;
+      for (const location of LOCATIONS) {
+        const deck = buildDeck(
+          DEFAULT_CARDS,
+          location,
+          scoringNeeded,
+          players,
+          players, // deterministic seed
+        );
+        expect(deck.scoring.length).toBe(scoringNeeded + players);
+        expect(
+          deck.scoring.every((c) => c.category !== "Chaos Event"),
+        ).toBe(true);
+        expect(deck.chaos.every((c) => c.category === "Chaos Event")).toBe(true);
+      }
+    }
   });
 });
 

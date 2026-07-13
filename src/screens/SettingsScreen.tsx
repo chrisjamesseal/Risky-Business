@@ -1,4 +1,5 @@
 import { Button } from "../components/ui";
+import { APP_VERSION } from "../data/changelog";
 import type { Settings } from "../types";
 
 export function SettingsScreen({
@@ -7,6 +8,7 @@ export function SettingsScreen({
   onChange,
   onOpenEditor,
   onResetCards,
+  onShowChangelog,
   onBack,
 }: {
   settings: Settings;
@@ -14,6 +16,7 @@ export function SettingsScreen({
   onChange: (settings: Settings) => void;
   onOpenEditor: () => void;
   onResetCards: () => void;
+  onShowChangelog: () => void;
   onBack: () => void;
 }) {
   return (
@@ -61,9 +64,9 @@ export function SettingsScreen({
           stored on this device. No accounts, no internet, no limits. Export
           your cards from the editor to back them up.
         </p>
-        <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>
-          Version 1.0
-        </p>
+        <button className="version-btn" onClick={onShowChangelog}>
+          Version {APP_VERSION} — what's new?
+        </button>
       </div>
     </div>
   );
