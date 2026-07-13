@@ -49,8 +49,8 @@ export const CATEGORY_ICON: Record<Category, string> = {
   Dare: "🔥",
   Challenge: "🎯",
   "Mini Game": "🕹️",
+  Ongoing: "⏳",
   "Group Round": "🎉",
-  "Chaos Event": "💥",
 };
 
 export const CATEGORY_SHORT: Record<Category, string> = {
@@ -58,8 +58,8 @@ export const CATEGORY_SHORT: Record<Category, string> = {
   Dare: "Dare",
   Challenge: "Chal",
   "Mini Game": "Mini",
+  Ongoing: "Ongoing",
   "Group Round": "Group",
-  "Chaos Event": "Chaos",
 };
 
 export const CATEGORY_COLOR: Record<Category, string> = {
@@ -67,8 +67,17 @@ export const CATEGORY_COLOR: Record<Category, string> = {
   Dare: "var(--pink)",
   Challenge: "var(--yellow)",
   "Mini Game": "var(--green)",
+  Ongoing: "var(--orange)",
   "Group Round": "var(--purple)",
-  "Chaos Event": "var(--pink)",
+};
+
+export const CATEGORY_DESCRIPTION: Record<Category, string> = {
+  Truth: "Answer honestly for the points, or bottle it for none.",
+  Dare: "Do it right now to bank the points.",
+  Challenge: "A quick skill or feat to pull off on the spot.",
+  "Mini Game": "A solo mini-game you win or lose for the points.",
+  Ongoing: "Keep a task going until your next turn — the group checks then.",
+  "Group Round": "A whole-group game or question. No points, just fun.",
 };
 
 export function Toast({

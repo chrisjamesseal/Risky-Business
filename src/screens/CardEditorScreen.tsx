@@ -9,7 +9,7 @@ import {
 } from "../types";
 import {
   Button,
-  CATEGORY_COLOR,
+  CATEGORY_DESCRIPTION,
   CATEGORY_ICON,
   CATEGORY_SHORT,
   DifficultyBadge,
@@ -158,6 +158,8 @@ export function CardEditorScreen({
         ))}
       </div>
 
+      <p className="cat-desc">{CATEGORY_DESCRIPTION[filter]}</p>
+
       <Button variant="primary" block onClick={() => setDraft(blankDraft(filter))}>
         + Add {filter}
       </Button>
@@ -175,12 +177,6 @@ export function CardEditorScreen({
               className="editor-item__main"
               onClick={() => setDraft(card)}
             >
-              <span
-                className="editor-item__icon"
-                style={{ color: CATEGORY_COLOR[card.category] }}
-              >
-                {CATEGORY_ICON[card.category]}
-              </span>
               <span className="editor-item__body">
                 <span className="editor-item__titlerow">
                   <span className="editor-item__title">{card.title}</span>
@@ -332,6 +328,7 @@ function CardForm({
             </option>
           ))}
         </select>
+        <span className="field__hint">{CATEGORY_DESCRIPTION[value.category]}</span>
       </div>
 
       {isScoringCategory(value.category) ? (

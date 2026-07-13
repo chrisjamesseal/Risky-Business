@@ -33,6 +33,22 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
         </div>
 
         <div className="help-block">
+          <div className="help-block__title">🃏 Card types</div>
+          <p>
+            <b>💬 Truth</b> — answer honestly.
+            <br />
+            <b>🔥 Dare</b> · <b>🎯 Challenge</b> · <b>🕹️ Mini Game</b> — do it
+            now, score or miss.
+            <br />
+            <b>⏳ Ongoing</b> — keep a task up until your next turn, then the
+            group checks and you score.
+            <br />
+            <b>🎉 Group Round</b> — a whole-group game or question, just for fun
+            (no points).
+          </p>
+        </div>
+
+        <div className="help-block">
           <div className="help-block__title">🎁 Lifelines (once each)</div>
           <p>
             <b>×2 Double</b> — arm it before revealing to double the next card.
@@ -42,10 +58,10 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
         </div>
 
         <div className="help-block">
-          <div className="help-block__title">💥 Chaos &amp; 🍺 Drinks</div>
+          <div className="help-block__title">🍺 Drink Mode</div>
           <p>
-            Chaos Events pop up between turns — read them aloud and obey. With
-            Drink Mode on, drinks are handed out at the end by finishing place.
+            Optional. No drinking during play — drinks are handed out at the end
+            by finishing place.
           </p>
         </div>
       </div>

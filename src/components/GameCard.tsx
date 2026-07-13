@@ -9,20 +9,16 @@ export function GameCard({
   doubled?: boolean;
 }) {
   const scoring = isScoringCategory(card.category);
-  const isChaos = card.category === "Chaos Event";
   const isRound = card.category === "Group Round";
+  const isOngoing = card.category === "Ongoing";
   const points = DIFFICULTY_POINTS[card.difficulty] * (doubled ? 2 : 1);
 
-  const badge = scoring
-    ? `${points} PTS${doubled ? " x2" : ""}`
-    : isChaos
-      ? "CHAOS"
-      : "NO POINTS";
+  const badge = scoring ? `${points} PTS${doubled ? " x2" : ""}` : "NO POINTS";
 
   const className =
     "game-card" +
-    (isChaos ? " game-card--chaos" : "") +
-    (isRound ? " game-card--round" : "");
+    (isRound ? " game-card--round" : "") +
+    (isOngoing ? " game-card--ongoing" : "");
 
   return (
     <div className={className}>

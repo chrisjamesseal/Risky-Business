@@ -22,7 +22,6 @@ export const DEFAULT_CARDS: Card[] = [
   t("truth-14", "Two Truths", "Tell two truths and one lie. Let the group guess the lie.", "Medium", "All"),
 
   // ------------------------------------------------------------------ Dares
-  d("dare-01", "Accent Round", "Speak in a fake accent until your next turn.", "Easy", "All"),
   d("dare-02", "Compliment Storm", "Give every player a genuine compliment right now.", "Easy", "All"),
   d("dare-03", "Text Roulette", "Send a single wave emoji to the 5th contact in your phone.", "Medium", "All"),
   d("dare-04", "Statue", "Freeze like a statue for a full 30 seconds.", "Easy", "All"),
@@ -34,7 +33,6 @@ export const DEFAULT_CARDS: Card[] = [
   d("dare-10", "Crowd Wave", "Start a wave and get at least two strangers to join.", "Extreme", "Club/Festival"),
   d("dare-11", "Home Catwalk", "Walk a runway across the room like a supermodel.", "Easy", "Home"),
   d("dare-12", "Phone Swap", "Let the player on your right post an emoji as your status.", "Extreme", "All"),
-  d("dare-13", "Whisper Only", "Only whisper until your next turn or lose your points.", "Medium", "All"),
   d("dare-14", "Trust Fall", "Do a mini trust-lean into a willing player's hands.", "Hard", "All"),
   d("dare-15", "Selfie Face", "Take the ugliest selfie you can and show the group.", "Easy", "All"),
   d("dare-16", "Group's Choice", "The group sets you a dare right now. You have to attempt it.", "Hard", "All"),
@@ -81,15 +79,16 @@ export const DEFAULT_CARDS: Card[] = [
   g("group-11", "Freeze Dance", "Everyone dances until the phone-holder yells freeze.", "Easy", "Club/Festival"),
   g("group-12", "Word Chain", "Category word chain around the group — keep it going as long as you can.", "Easy", "All"),
 
-  // ------------------------------------------------------------ Chaos Events
-  x("chaos-01", "Score Swap!", "Swap scores with the player to your left. Chaos reigns.", "Medium", "All"),
-  { ...x("chaos-02", "Double Trouble", "This turn's card is worth double points. Brace yourself!", "Medium", "All"), doublesNext: true },
-  x("chaos-03", "Great Reversal", "Play order reverses for the rest of the round.", "Easy", "All"),
-  x("chaos-04", "Robbery", "Steal 100 points from the current leader.", "Hard", "All"),
-  x("chaos-05", "Group Toast", "Everyone raise a glass (or hand) and cheer the loudest.", "Easy", "All"),
-  x("chaos-06", "New Nickname", "The group gives you a nickname for the rest of the game.", "Easy", "All"),
-  x("chaos-07", "Silent Round", "No one may speak until the next player's card. Break it, lose 100.", "Medium", "All"),
-  x("chaos-08", "Karma", "The last player to complete a card gives away 200 points.", "Hard", "All"),
+  // ---- Ongoing (start now, keep it up until your next turn, checked then) ---
+  o("ongoing-01", "Accent", "Speak in a fake accent until your next turn.", "Easy", "All"),
+  o("ongoing-02", "Whisper Only", "Only whisper until your next turn.", "Easy", "All"),
+  o("ongoing-03", "One-Word Answers", "Answer only in single words until your next turn.", "Medium", "All"),
+  o("ongoing-04", "Slow Motion", "Do everything in slow motion until your next turn.", "Medium", "All"),
+  o("ongoing-05", "No Names", "Don't say anyone's name until your next turn.", "Hard", "All"),
+  o("ongoing-06", "Third Person", "Refer to yourself in the third person until your next turn.", "Medium", "All"),
+  o("ongoing-07", "Stand to Speak", "Stand up every time you speak until your next turn.", "Medium", "Home"),
+  o("ongoing-08", "Posh Voice", "Speak in your poshest voice until your next turn.", "Easy", "Pub"),
+  o("ongoing-09", "Hype Master", "Hype up every song that plays until your next turn.", "Medium", "Club/Festival"),
 ];
 
 // --- tiny builders to keep the list above readable --------------------------
@@ -120,6 +119,6 @@ function m(id: string, title: string, description: string, difficulty: Card["dif
 function g(id: string, title: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
   return make(id, "Group Round", title, description, difficulty, location);
 }
-function x(id: string, title: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
-  return make(id, "Chaos Event", title, description, difficulty, location);
+function o(id: string, title: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
+  return make(id, "Ongoing", title, description, difficulty, location);
 }
