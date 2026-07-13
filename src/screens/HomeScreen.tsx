@@ -1,13 +1,16 @@
 import { Button } from "../components/ui";
+import { APP_VERSION } from "../data/changelog";
 
 export function HomeScreen({
   onNewGame,
-  onSettings,
+  onOpenEditor,
   onHelp,
+  onShowChangelog,
 }: {
   onNewGame: () => void;
-  onSettings: () => void;
+  onOpenEditor: () => void;
   onHelp: () => void;
+  onShowChangelog: () => void;
 }) {
   return (
     <div className="screen screen--center">
@@ -22,16 +25,20 @@ export function HomeScreen({
         <Button variant="primary" large block onClick={onNewGame}>
           ▶ New Game
         </Button>
-        <Button variant="secondary" block onClick={onSettings}>
-          ⚙ Settings
-        </Button>
-        <Button variant="ghost" block onClick={onHelp}>
+        <Button variant="secondary" block onClick={onHelp}>
           ? How to Play
         </Button>
+        <Button variant="default" block onClick={onOpenEditor}>
+          ✎ Card Editor
+        </Button>
 
-        <p className="tagline" style={{ marginTop: 18 }}>
-          Offline party game
-        </p>
+        <button
+          className="version-btn"
+          style={{ alignSelf: "center", marginTop: 14 }}
+          onClick={onShowChangelog}
+        >
+          Offline party game · v{APP_VERSION}
+        </button>
       </div>
     </div>
   );

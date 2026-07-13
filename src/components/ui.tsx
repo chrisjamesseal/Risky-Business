@@ -75,9 +75,9 @@ export const CATEGORY_DESCRIPTION: Record<Category, string> = {
   Truth: "Answer honestly for the points, or bottle it for none.",
   Dare: "Do it right now to bank the points.",
   Challenge: "A quick skill or feat to pull off on the spot.",
-  "Mini Game": "A solo mini-game you win or lose for the points.",
+  "Mini Game": "A group game with a winner — play it, then pick who won for the points.",
   Ongoing: "Keep a task going until your next turn — the group checks then.",
-  "Group Round": "A whole-group game or question. No points, just fun.",
+  "Group Round": "A random game or question with no winner. Just for fun, no points.",
 };
 
 export function Toast({

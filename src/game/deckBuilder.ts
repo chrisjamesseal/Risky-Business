@@ -11,7 +11,7 @@ import { createRng, shuffle, type Rng } from "./random";
 export interface Deck {
   /** Scoring cards in play order (difficulty rises across the game). */
   scoring: Card[];
-  /** Shuffled non-scoring interludes (Group Rounds and Chaos Events). */
+  /** Shuffled non-scoring interludes (Group Rounds). */
   interludes: Card[];
 }
 
@@ -30,24 +30,34 @@ export function isUsableInLocation(
   return cardLocation === "All" || cardLocation === location;
 }
 
-export function enabledCardsForLocation(
+export function cardsForLocation(
   cards: readonly Card[],
   location: GameLocation,
 ): Card[] {
-  return cards.filter(
-    (card) => card.enabled && isUsableInLocation(card.location, location),
+  return cards.filter((card) => isUsableInLocation(card.location, location));
+}
+
+/** Scoring cards available for a location and the chosen difficulty set. */
+export function scoringCardsFor(
+  cards: readonly Card[],
+  location: GameLocation,
+  difficulties: readonly Difficulty[],
+): Card[] {
+  return cardsForLocation(cards, location).filter(
+    (c) => isScoringCategory(c.category) && difficulties.includes(c.difficulty),
   );
 }
 
 /**
  * Build a balanced deck for a game.
  *
- * - `scoringCount` scoring cards are chosen with difficulty rising over the
- *   course of the game (early turns skew Easy/Medium, late turns Hard/Extreme).
+ * - Only scoring cards of the chosen `difficulties` are used, with difficulty
+ *   rising over the course of the game.
  * - Repeats are avoided until the available pool for a tier is exhausted, at
  *   which point that tier's pool is reshuffled so play can continue.
  * - A `buffer` of extra scoring cards is appended so Swap lifelines have
  *   material to draw from without ending the game early.
+ * - Group Round interludes are always available regardless of difficulty.
  */
 export function buildDeck(
   cards: readonly Card[],
@@ -55,11 +65,14 @@ export function buildDeck(
   scoringCount: number,
   buffer = 0,
   seed?: number,
+  difficulties: readonly Difficulty[] = DIFFICULTIES,
 ): Deck {
   const rng = createRng(seed);
-  const usable = enabledCardsForLocation(cards, location);
+  const usable = cardsForLocation(cards, location);
 
-  const scoringPool = usable.filter((c) => isScoringCategory(c.category));
+  const scoringPool = usable.filter(
+    (c) => isScoringCategory(c.category) && difficulties.includes(c.difficulty),
+  );
   const interludePool = usable.filter((c) => !isScoringCategory(c.category));
 
   const total = scoringCount + buffer;

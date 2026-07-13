@@ -1,6 +1,7 @@
 import {
   SCORING_TURNS_PER_PLAYER,
   type Card,
+  type Difficulty,
   type GameLocation,
   type Player,
 } from "../types";
@@ -25,6 +26,8 @@ export interface GameState {
   lastDoubled: boolean;
   /** True when the last resolution started an Ongoing task (deferred points). */
   lastMissionStarted: boolean;
+  /** Name of the Mini Game winner just awarded, if any. */
+  lastWinnerName: string | null;
   finished: boolean;
 }
 
@@ -32,6 +35,7 @@ export interface NewGameConfig {
   names: string[];
   location: GameLocation;
   drinkMode: boolean;
+  difficulties: Difficulty[];
   cards: Card[];
   seed?: number;
 }
@@ -60,6 +64,7 @@ export function createGame(config: NewGameConfig): GameState {
     scoringNeeded,
     players.length,
     config.seed,
+    config.difficulties,
   );
 
   return {
@@ -75,6 +80,7 @@ export function createGame(config: NewGameConfig): GameState {
     lastAward: null,
     lastDoubled: false,
     lastMissionStarted: false,
+    lastWinnerName: null,
     finished: false,
   };
 }
@@ -88,6 +94,7 @@ export type GameAction =
   | { type: "FAIL" }
   | { type: "START_MISSION" }
   | { type: "RESOLVE_MISSION"; success: boolean }
+  | { type: "AWARD_MINI"; winnerId: string | null }
   | { type: "NEXT" };
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -110,6 +117,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return startMission(state);
     case "RESOLVE_MISSION":
       return resolveMission(state, action.success);
+    case "AWARD_MINI":
+      return awardMini(state, action.winnerId);
     case "NEXT":
       return next(state);
     default:
@@ -199,6 +208,49 @@ function resolve(state: GameState, completed: boolean): GameState {
     lastAward: award,
     lastDoubled: doubled,
     lastMissionStarted: false,
+    lastWinnerName: null,
+    phase: "result",
+  };
+}
+
+/**
+ * Resolve a Mini Game: the current player's turn is used, but the points go to
+ * whoever the group says won (or nobody). The current player's ×2, if armed,
+ * doubles the winner's points and is consumed.
+ */
+function awardMini(state: GameState, winnerId: string | null): GameState {
+  if (state.phase !== "card" || !state.currentCard) return state;
+  if (state.currentCard.category !== "Mini Game") return state;
+  const currentIndex = state.currentPlayerIndex;
+  const doubled = state.players[currentIndex].doublePointsArmed;
+  const award = winnerId ? cardPoints(state.currentCard, doubled) : 0;
+  const winner = winnerId
+    ? state.players.find((p) => p.id === winnerId)
+    : undefined;
+
+  const players = state.players.map((p, i) => {
+    let next = p;
+    if (i === currentIndex) {
+      next = {
+        ...next,
+        scoringTurnsCompleted: next.scoringTurnsCompleted + 1,
+        doublePointsArmed: false,
+        doublePointsUsed: next.doublePointsUsed || doubled,
+      };
+    }
+    if (p.id === winnerId) {
+      next = { ...next, score: next.score + award };
+    }
+    return next;
+  });
+
+  return {
+    ...state,
+    players,
+    lastAward: award,
+    lastDoubled: doubled,
+    lastMissionStarted: false,
+    lastWinnerName: winner ? winner.name : null,
     phase: "result",
   };
 }
@@ -227,6 +279,7 @@ function startMission(state: GameState): GameState {
     lastAward: null,
     lastDoubled: doubled,
     lastMissionStarted: true,
+    lastWinnerName: null,
     phase: "result",
   };
 }
@@ -293,6 +346,7 @@ function advance(state: GameState): GameState {
     lastAward: null,
     lastDoubled: false,
     lastMissionStarted: false,
+    lastWinnerName: null,
   };
   // A pending Ongoing task from this player's last turn is checked first.
   return {

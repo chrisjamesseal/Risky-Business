@@ -274,6 +274,36 @@ textarea {
   line-height: 1.4;
 }
 
+/* Drink Mode explainer in game setup. */
+.drink-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.drink-info p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+.drink-ladder {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.drink-ladder__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  padding: 4px 0;
+  border-bottom: 2px solid var(--border);
+}
+.drink-ladder__drinks {
+  color: var(--cyan);
+}
+
 /* Category explainer shown above the card list in the editor. */
 .cat-desc {
   margin: 0;
@@ -570,6 +600,16 @@ select:focus {
   flex-direction: column;
   justify-content: center;
   gap: 14px;
+}
+
+/* Mini Game winner picker. */
+.winner-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.winner-grid .chip {
+  flex: none;
 }
 
 /* Pass-the-phone handoff (ready phase). */

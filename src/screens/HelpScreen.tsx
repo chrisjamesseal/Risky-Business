@@ -35,16 +35,17 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
         <div className="help-block">
           <div className="help-block__title">🃏 Card types</div>
           <p>
-            <b>💬 Truth</b> — answer honestly.
+            <b>💬 Truth</b> · <b>🔥 Dare</b> · <b>🎯 Challenge</b> — do it now,
+            score or miss.
             <br />
-            <b>🔥 Dare</b> · <b>🎯 Challenge</b> · <b>🕹️ Mini Game</b> — do it
-            now, score or miss.
+            <b>🕹️ Mini Game</b> — the whole group plays, then you pick who won
+            and they take the points.
             <br />
             <b>⏳ Ongoing</b> — keep a task up until your next turn, then the
             group checks and you score.
             <br />
-            <b>🎉 Group Round</b> — a whole-group game or question, just for fun
-            (no points).
+            <b>🎉 Group Round</b> — a game or question with no winner, just for
+            fun (no points).
           </p>
         </div>
 

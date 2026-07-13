@@ -2,14 +2,21 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_CARDS } from "../data/defaultCards";
 import {
   buildDeck,
-  enabledCardsForLocation,
+  cardsForLocation,
   isUsableInLocation,
+  scoringCardsFor,
 } from "./deckBuilder";
 import { cardPoints, finishingPositions, rankedPlayers } from "./scoring";
 import { drinksForPosition } from "./drinks";
-import { createGame, gameReducer, type GameState } from "./gameReducer";
+import {
+  createGame,
+  gameReducer,
+  type GameState,
+  type NewGameConfig,
+} from "./gameReducer";
 import {
   CATEGORIES,
+  DIFFICULTIES,
   isScoringCategory,
   LOCATIONS,
   SCORING_CATEGORIES,
@@ -17,6 +24,18 @@ import {
   type Card,
   type Player,
 } from "../types";
+
+/** Base game config for tests; every difficulty included by default. */
+function gameConfig(overrides: Partial<NewGameConfig>): NewGameConfig {
+  return {
+    names: ["A", "B"],
+    location: "Home",
+    drinkMode: false,
+    difficulties: [...DIFFICULTIES],
+    cards: DEFAULT_CARDS,
+    ...overrides,
+  };
+}
 
 function player(overrides: Partial<Player> = {}): Player {
   return {
@@ -39,14 +58,22 @@ describe("location filtering", () => {
     expect(isUsableInLocation("Home", "Pub")).toBe(false);
   });
 
-  it("excludes disabled cards", () => {
+  it("only includes cards for the location (or All)", () => {
     const cards: Card[] = [
-      { ...DEFAULT_CARDS[0], enabled: false },
-      { ...DEFAULT_CARDS[1], enabled: true },
+      { ...DEFAULT_CARDS[0], location: "Home" },
+      { ...DEFAULT_CARDS[1], location: "Pub" },
     ];
-    const usable = enabledCardsForLocation(cards, "Home");
-    expect(usable.every((c) => c.enabled)).toBe(true);
+    const usable = cardsForLocation(cards, "Home");
     expect(usable.length).toBe(1);
+    expect(usable[0].location).toBe("Home");
+  });
+
+  it("filters scoring cards by the chosen difficulties", () => {
+    const easyOnly = scoringCardsFor(DEFAULT_CARDS, "Home", ["Easy"]);
+    expect(easyOnly.length).toBeGreaterThan(0);
+    expect(easyOnly.every((c) => c.difficulty === "Easy")).toBe(true);
+    const hardOnly = scoringCardsFor(DEFAULT_CARDS, "Home", ["Hard"]);
+    expect(hardOnly.every((c) => c.difficulty === "Hard")).toBe(true);
   });
 });
 
@@ -73,7 +100,7 @@ describe("default library balance", () => {
 
   it("every location offers an Extreme action card for late-game turns", () => {
     for (const location of LOCATIONS) {
-      const usable = enabledCardsForLocation(DEFAULT_CARDS, location);
+      const usable = cardsForLocation(DEFAULT_CARDS, location);
       const extreme = usable.filter(
         (c) => c.difficulty === "Extreme" && c.category !== "Truth",
       );
@@ -84,8 +111,8 @@ describe("default library balance", () => {
   it("every location has enough scoring cards for an 8-player game", () => {
     const needed = 8 * SCORING_TURNS_PER_PLAYER; // 40
     for (const location of LOCATIONS) {
-      const scoring = enabledCardsForLocation(DEFAULT_CARDS, location).filter(
-        (c) => (SCORING_CATEGORIES as readonly string[]).includes(c.category),
+      const scoring = cardsForLocation(DEFAULT_CARDS, location).filter((c) =>
+        (SCORING_CATEGORIES as readonly string[]).includes(c.category),
       );
       expect(scoring.length).toBeGreaterThanOrEqual(needed);
     }
@@ -201,13 +228,7 @@ describe("drinks", () => {
 });
 
 describe("game reducer", () => {
-  const config = {
-    names: ["Ann", "Ben"],
-    location: "Home" as const,
-    drinkMode: false,
-    cards: DEFAULT_CARDS,
-    seed: 5,
-  };
+  const config = gameConfig({ names: ["Ann", "Ben"], seed: 5 });
 
   it("creates two players with zeroed state", () => {
     const state = createGame(config);
@@ -310,6 +331,48 @@ describe("chaos removed", () => {
   });
 });
 
+describe("Mini Games (winner picks up the points)", () => {
+  const mini: Card = {
+    id: "mg",
+    title: "Categories",
+    description: "play",
+    category: "Mini Game",
+    difficulty: "Medium",
+    location: "All",
+  };
+
+  it("has default Mini Games, and they are scoring", () => {
+    const games = DEFAULT_CARDS.filter((c) => c.category === "Mini Game");
+    expect(games.length).toBeGreaterThan(0);
+    expect(games.every((c) => isScoringCategory(c.category))).toBe(true);
+    // The old solo mini-games moved out.
+    expect(games.map((c) => c.title)).not.toContain("Coaster Toss");
+  });
+
+  it("awards the card's points to the chosen winner", () => {
+    let state = createGame(gameConfig({ cards: [mini], seed: 4 }));
+    state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+    expect(state.currentCard?.category).toBe("Mini Game");
+    const winner = state.players[1];
+    state = gameReducer(state, { type: "AWARD_MINI", winnerId: winner.id });
+    expect(state.phase).toBe("result");
+    expect(state.players[1].score).toBe(200); // Medium
+    expect(state.players[0].score).toBe(0);
+    // The current player spent their turn regardless of who won.
+    expect(state.players[0].scoringTurnsCompleted).toBe(1);
+    expect(state.lastWinnerName).toBe(winner.name);
+  });
+
+  it("awards nothing when there's no winner", () => {
+    let state = createGame(gameConfig({ cards: [mini], seed: 4 }));
+    state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+    state = gameReducer(state, { type: "AWARD_MINI", winnerId: null });
+    expect(state.players.every((p) => p.score === 0)).toBe(true);
+    expect(state.players[0].scoringTurnsCompleted).toBe(1);
+    expect(state.lastWinnerName).toBeNull();
+  });
+});
+
 describe("Ongoing tasks", () => {
   const card = (id: string, category: Card["category"]): Card => ({
     id,
@@ -318,7 +381,6 @@ describe("Ongoing tasks", () => {
     category,
     difficulty: "Easy",
     location: "All",
-    enabled: true,
   });
 
   it("has Ongoing cards, and they are scoring", () => {
@@ -328,14 +390,7 @@ describe("Ongoing tasks", () => {
   });
 
   // A deck where every scoring card is an Ongoing "Accent" task.
-  const cards: Card[] = [card("on", "Ongoing")];
-  const cfg = {
-    names: ["A", "B"],
-    location: "Home" as const,
-    drinkMode: false,
-    cards,
-    seed: 2,
-  };
+  const cfg = gameConfig({ cards: [card("on", "Ongoing")], seed: 2 });
 
   it("defers points: start now, check and score at the next turn", () => {
     let state = createGame(cfg);

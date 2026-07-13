@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.5.0";
+export const APP_VERSION = "1.7.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,25 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.7.0",
+    title: "Mini Games with winners",
+    changes: [
+      "Mini Games are now group games with a winner: play it, then pick who won and they take the points",
+      "Group Rounds are only the no-winner games now (Never Have I Ever, Would You Rather…) and still score nothing",
+      "The old solo mini-games (Coaster Toss, Countdown, Staring Contest, Beatbox) moved to Challenges",
+    ],
+  },
+  {
+    version: "1.6.0",
+    title: "Setup & editor overhaul",
+    changes: [
+      "Pick which difficulties to include in a game at setup (just Easy, just Hard, or any mix) instead of enabling cards one by one",
+      "Card editor uses tappable chips instead of dropdowns; removed the Duplicate action",
+      "Card Editor and How to Play now live on the home screen — the Settings menu is gone",
+      "Drink Mode is set in game setup (off by default) with a clear explanation of the end-of-game drinks",
+    ],
+  },
   {
     version: "1.5.0",
     title: "Ongoing tasks & tidy-up",
