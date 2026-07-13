@@ -208,6 +208,12 @@ h3 {
   box-shadow: none;
   border-color: transparent;
 }
+/* Present but understated — for secondary actions like Swap. */
+.btn--muted {
+  background: var(--panel-2);
+  color: var(--ink-dim);
+  font-size: 14px;
+}
 .btn--ghost:active:not(:disabled) {
   transform: none;
 }
@@ -717,6 +723,23 @@ select:focus {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.lb-row__lifelines {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.lb-life {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.lb-life--used {
+  opacity: 0.25;
+  text-decoration: line-through;
+}
+.lb-life--armed {
+  color: var(--yellow);
 }
 .lb-row__done {
   font-size: 11px;

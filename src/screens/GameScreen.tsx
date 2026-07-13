@@ -59,30 +59,6 @@ export function GameScreen({
           <span className="turn-banner__name">{player.name}</span>
           <span className="turn-banner__score">{player.score}</span>
         </div>
-        <div className="lifelines">
-          <Button
-            variant={player.doublePointsArmed ? "warn" : "default"}
-            disabled={
-              state.phase !== "ready" ||
-              player.doublePointsUsed ||
-              player.doublePointsArmed
-            }
-            onClick={() => dispatch({ type: "ARM_DOUBLE" })}
-          >
-            {player.doublePointsArmed
-              ? "×2 ARMED"
-              : player.doublePointsUsed
-                ? "×2 USED"
-                : "×2 Double"}
-          </Button>
-          <Button
-            variant="default"
-            disabled={state.phase !== "card" || player.swapUsed}
-            onClick={() => dispatch({ type: "SWAP" })}
-          >
-            {player.swapUsed ? "🔄 USED" : "🔄 Swap"}
-          </Button>
-        </div>
       </div>
 
       <div className="game-body">
@@ -91,17 +67,26 @@ export function GameScreen({
             <div className="handoff__icon">📲</div>
             <p className="handoff__label">Pass the phone to</p>
             <p className="handoff__name">{player.name}</p>
-            {player.doublePointsArmed ? (
-              <p className="handoff__hint" style={{ color: "var(--yellow)" }}>
-                ×2 armed — this card scores double!
-              </p>
-            ) : (
-              <p className="handoff__hint muted">
-                {player.doublePointsUsed
-                  ? " "
-                  : "Tip: tap ×2 above before you reveal — it locks once the card is out."}
-              </p>
+            {!player.doublePointsUsed && (
+              <Button
+                variant={player.doublePointsArmed ? "warn" : "secondary"}
+                large
+                block
+                disabled={player.doublePointsArmed}
+                onClick={() => dispatch({ type: "ARM_DOUBLE" })}
+              >
+                {player.doublePointsArmed
+                  ? "×2 ARMED — next card doubles!"
+                  : "×2 Double Points"}
+              </Button>
             )}
+            <p className="handoff__hint muted">
+              {player.doublePointsArmed
+                ? "Locked in — reveal your card."
+                : player.doublePointsUsed
+                  ? " "
+                  : "Gamble your ×2 before revealing — it locks once the card is out."}
+            </p>
             <Button
               variant="primary"
               large
@@ -199,6 +184,17 @@ export function GameScreen({
               </Button>
             </div>
           </div>
+        )}
+
+        {state.phase === "card" && state.currentCard && !player.swapUsed && (
+          <Button
+            variant="default"
+            block
+            className="btn--muted"
+            onClick={() => dispatch({ type: "SWAP" })}
+          >
+            🔄 Swap this card · −100
+          </Button>
         )}
 
         {state.phase === "checkin" && player.pendingMission && (

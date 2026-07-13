@@ -309,17 +309,21 @@ describe("game reducer", () => {
     expect(state.players[0].doublePointsArmed).toBe(false);
   });
 
-  it("swap replaces the current card and is single use", () => {
+  it("swap replaces the current card, costs 100 points, and is single use", () => {
     let state = createGame(config);
     state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
     const first = state.currentCard;
+    const before = state.players[0].score;
     state = gameReducer(state, { type: "SWAP" });
     expect(state.players[0].swapUsed).toBe(true);
+    expect(state.players[0].score).toBe(before - 100); // swap penalty
     expect(state.currentCard).not.toBe(first);
-    // second swap is a no-op
-    const before = state.currentCard;
+    // second swap is a no-op (no further penalty)
+    const card = state.currentCard;
+    const score = state.players[0].score;
     state = gameReducer(state, { type: "SWAP" });
-    expect(state.currentCard).toBe(before);
+    expect(state.currentCard).toBe(card);
+    expect(state.players[0].score).toBe(score);
   });
 
   it("finishes after every player completes their scoring turns", () => {

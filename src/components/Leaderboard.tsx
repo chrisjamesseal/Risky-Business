@@ -25,6 +25,33 @@ export function Leaderboard({
           >
             <span className="lb-row__pos">{positions.get(player.id)}</span>
             <span className="lb-row__name">{player.name}</span>
+            <span className="lb-row__lifelines">
+              <span
+                className={
+                  "lb-life" +
+                  (player.doublePointsArmed
+                    ? " lb-life--armed"
+                    : player.doublePointsUsed
+                      ? " lb-life--used"
+                      : "")
+                }
+                title={
+                  player.doublePointsUsed
+                    ? "Double Points used"
+                    : player.doublePointsArmed
+                      ? "Double Points armed"
+                      : "Double Points available"
+                }
+              >
+                ×2
+              </span>
+              <span
+                className={"lb-life" + (player.swapUsed ? " lb-life--used" : "")}
+                title={player.swapUsed ? "Swap used" : "Swap available"}
+              >
+                🔄
+              </span>
+            </span>
             <span className="lb-row__done">
               {player.scoringTurnsCompleted}/{SCORING_TURNS_PER_PLAYER}
             </span>
