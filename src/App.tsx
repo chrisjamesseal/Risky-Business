@@ -8,10 +8,9 @@ import type {
 } from "./types";
 import type { NewGameConfig } from "./game/gameReducer";
 import {
-  loadCards,
-  loadCategories,
-  resetCards,
-  resetCategories,
+  loadLibrary,
+  markCustomized,
+  resetLibrary,
   saveCards,
   saveCategories,
 } from "./storage/localStorage";
@@ -47,10 +46,9 @@ interface ToastState {
 
 export function App() {
   const [screen, setScreen] = useState<Screen>("home");
-  const [categories, setCategories] = useState<CategoryDef[]>(() =>
-    loadCategories(),
-  );
-  const [cards, setCards] = useState<Card[]>(() => loadCards(loadCategories()));
+  const [library] = useState(loadLibrary);
+  const [categories, setCategories] = useState<CategoryDef[]>(library.categories);
+  const [cards, setCards] = useState<Card[]>(library.cards);
   const [gameConfig, setGameConfig] = useState<NewGameConfig | null>(null);
   const [results, setResults] = useState<Results | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -58,6 +56,17 @@ export function App() {
 
   useEffect(() => saveCards(cards), [cards]);
   useEffect(() => saveCategories(categories), [categories]);
+
+  // Editing cards or categories marks the library customised so app updates
+  // won't overwrite the player's set.
+  const updateCards = (next: Card[]) => {
+    markCustomized();
+    setCards(next);
+  };
+  const updateCategories = (next: CategoryDef[]) => {
+    markCustomized();
+    setCategories(next);
+  };
 
   const showToast = useCallback((message: string, error = false) => {
     window.clearTimeout(toastTimer.current);
@@ -87,8 +96,9 @@ export function App() {
 
   const handleReset = () => {
     if (window.confirm("Reset all cards and categories to the default set?")) {
-      setCategories(resetCategories());
-      setCards(resetCards());
+      const lib = resetLibrary();
+      setCategories(lib.categories);
+      setCards(lib.cards);
       showToast("Reset to default");
     }
   };
@@ -141,8 +151,8 @@ export function App() {
           <CardEditorScreen
             cards={cards}
             categories={categories}
-            onChange={setCards}
-            onChangeCategories={setCategories}
+            onChange={updateCards}
+            onChangeCategories={updateCategories}
             onReset={handleReset}
             onBack={() => setScreen("home")}
             onToast={showToast}

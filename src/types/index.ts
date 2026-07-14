@@ -5,7 +5,7 @@
  * - standard: the current player does it now and completes/fails for points.
  * - mini:     the whole group plays, then you pick a winner who takes the points.
  * - ongoing:  the player starts a task now; it's checked at their next turn.
- * - group:    a non-scoring interlude — everyone joins in, nobody scores.
+ * - group:    a non-scoring interlude - everyone joins in, nobody scores.
  */
 export const CATEGORY_BEHAVIORS = [
   "standard",
@@ -16,10 +16,10 @@ export const CATEGORY_BEHAVIORS = [
 export type CategoryBehavior = (typeof CATEGORY_BEHAVIORS)[number];
 
 export const BEHAVIOR_LABEL: Record<CategoryBehavior, string> = {
-  standard: "Do it now — score or miss",
-  mini: "Group game — pick the winner",
-  ongoing: "Ongoing task — checked next turn",
-  group: "Just for fun — no points",
+  standard: "Do it now - score or miss",
+  mini: "Group game - pick the winner",
+  ongoing: "Ongoing task - checked next turn",
+  group: "Just for fun - no points",
 };
 
 /** Categories are user-editable data, so a category name is just a string. */

@@ -169,7 +169,7 @@ export function SetupScreen({
               onClick={() => toggleDifficulty(d)}
               aria-pressed={difficulties.includes(d)}
             >
-              {d} · {DIFFICULTY_POINTS[d]}
+              <span className={"diff-dot diff-" + d} /> {d} · {DIFFICULTY_POINTS[d]}
             </button>
           ))}
         </div>
@@ -194,7 +194,7 @@ export function SetupScreen({
         </button>
         <div className="panel drink-info">
           <p>
-            No drinking during the game — it only affects the end. When the final
+            No drinking during the game - it only affects the end. When the final
             scores are in, players get drinks based on where they finished:
           </p>
           <div className="drink-ladder">

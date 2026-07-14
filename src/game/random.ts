@@ -3,7 +3,7 @@
 
 export type Rng = () => number;
 
-/** mulberry32 — a compact, decent-quality seeded PRNG. */
+/** mulberry32 - a compact, decent-quality seeded PRNG. */
 export function createRng(seed?: number): Rng {
   if (seed === undefined) return Math.random;
   let a = seed >>> 0;
@@ -16,7 +16,7 @@ export function createRng(seed?: number): Rng {
   };
 }
 
-/** Fisher–Yates shuffle returning a new array. */
+/** Fisher-Yates shuffle returning a new array. */
 export function shuffle<T>(items: readonly T[], rng: Rng): T[] {
   const out = items.slice();
   for (let i = out.length - 1; i > 0; i--) {

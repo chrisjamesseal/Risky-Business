@@ -69,12 +69,12 @@ export const DEFAULT_CARDS: Card[] = [
   m("mini-01", "Categories", "Pick a category and name things round the group. Last one who can keep going wins.", "Medium", "All"),
   m("mini-02", "Rhyme Time", "Pick a word and rhyme it round the group. Last one still rhyming wins.", "Medium", "All"),
   m("mini-03", "Word Chain", "Category word chain round the group. Last one who hasn't blanked or repeated wins.", "Hard", "All"),
-  m("mini-04", "RPS Champion", "Rock–paper–scissors knockout round the group. The champion wins.", "Easy", "All"),
+  m("mini-04", "RPS Champion", "Rock-paper-scissors knockout round the group. The champion wins.", "Easy", "All"),
   m("mini-05", "Thumb War", "Best-of-three thumb war between two willing players. The winner takes it.", "Easy", "All"),
   m("mini-06", "The Floor Is Lava", "On three, feet off the floor. Group picks who got up cleanest.", "Easy", "Home"),
   m("mini-07", "Freeze Dance", "Everyone dances; freeze on command. Group picks the best.", "Medium", "Club/Festival"),
 
-  // ---- Group Rounds (no winner — just for fun, no points) -------------------
+  // ---- Group Rounds (no winner - just for fun, no points) -------------------
   g("group-01", "Never Have I Ever", "One round: everyone puts a finger down for things they've done.", "Easy", "All"),
   g("group-02", "Would You Rather", "The group hits the table with a brutal 'would you rather'. Everyone answers.", "Easy", "All"),
   g("group-04", "20 Questions", "The group thinks of something; everyone guesses it in 20 questions.", "Easy", "All"),

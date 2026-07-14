@@ -51,7 +51,7 @@ export interface NewGameConfig {
 const INTERLUDE_CHANCE = 0.28;
 
 /** Points deducted for using the Swap lifeline. */
-export const SWAP_COST = 100;
+export const SWAP_COST = 50;
 
 export function createGame(config: NewGameConfig): GameState {
   const players: Player[] = config.names.map((name, index) => ({

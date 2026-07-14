@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.9.0";
+export const APP_VERSION = "1.10.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.10.0",
+    title: "Auto-updating cards & polish",
+    changes: [
+      "The default questions now update automatically when the app updates, unless you've customised your own cards",
+      "Difficulty colour codes (green Easy, cyan Medium, yellow Hard, pink Extreme) on the difficulty pickers",
+      "Swap now costs 50 points (was 100)",
+      "×2 Double Points is now an outlined button; removed the long dashes across the app",
+    ],
+  },
   {
     version: "1.9.0",
     title: "Lifeline tweaks",
@@ -41,7 +51,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     changes: [
       "Pick which difficulties to include in a game at setup (just Easy, just Hard, or any mix) instead of enabling cards one by one",
       "Card editor uses tappable chips instead of dropdowns; removed the Duplicate action",
-      "Card Editor and How to Play now live on the home screen — the Settings menu is gone",
+      "Card Editor and How to Play now live on the home screen - the Settings menu is gone",
       "Drink Mode is set in game setup (off by default) with a clear explanation of the end-of-game drinks",
     ],
   },
@@ -50,7 +60,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     title: "Ongoing tasks & tidy-up",
     changes: [
       "New Ongoing category: start a task (e.g. keep an accent), then the group checks 'did you keep it up?' at your next turn and you score",
-      "Removed Chaos Events — they relied on effects the game doesn't handle yet",
+      "Removed Chaos Events - they relied on effects the game doesn't handle yet",
       "Every category now has a short description in the editor and How to Play",
       "Editor list is cleaner: card emoji removed to make room for the text",
     ],
@@ -59,7 +69,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.4.0",
     title: "Double points fixes",
     changes: [
-      "The 'Double Trouble' chaos card now really doubles that turn's card — it was only flavour text before",
+      "The 'Double Trouble' chaos card now really doubles that turn's card - it was only flavour text before",
       "Made the ×2 lifeline clearer: it's a pre-reveal gamble that locks once the card is out",
       "Card editor list now shows each card's full description without opening it",
     ],
@@ -75,7 +85,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.3.0",
     title: "Group Rounds",
     changes: [
-      "New Group Round category — whole-group games and questions that award no points, so cards like Never Have I Ever and Would You Rather aren't forced into pass/fail",
+      "New Group Round category - whole-group games and questions that award no points, so cards like Never Have I Ever and Would You Rather aren't forced into pass/fail",
       "Moved the group-only games out of Mini Games and added new question rounds (Hot Seat, Most Likely To, This or That, Group Vote)",
       "Group Rounds and Chaos Events now appear between turns as no-points interludes",
     ],
@@ -84,7 +94,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.2.0",
     title: "Balance & Editor",
     changes: [
-      "Fairer points — truths now cap at Medium, so the biggest scores come from dares, challenges and mini games",
+      "Fairer points - truths now cap at Medium, so the biggest scores come from dares, challenges and mini games",
       "Added higher-difficulty dares, challenges and mini games for every location",
       "Card editor redesigned with a live, in-game style card preview",
       "Tap the version number to see this changelog",
@@ -106,7 +116,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.0.0",
     title: "Initial release",
     changes: [
-      "Offline party game for 2–8 players",
+      "Offline party game for 2-8 players",
       "Home, Pub and Club/Festival card pools",
       "Five scoring turns each with a live leaderboard",
       "Swap and Double Points lifelines, Chaos Events and Drink Mode",
