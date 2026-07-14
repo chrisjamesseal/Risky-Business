@@ -4,9 +4,12 @@ import { DifficultyBadge } from "./ui";
 
 export function GameCard({
   card,
+  playerName,
   doubled = false,
 }: {
   card: Card;
+  /** Shown in place of a card title - every card reads as if speaking to them. */
+  playerName?: string;
   doubled?: boolean;
 }) {
   const category = useCategory(card.category);
@@ -31,7 +34,7 @@ export function GameCard({
         <span className="game-card__points">{badge}</span>
       </div>
 
-      <div className="game-card__title">{card.title}</div>
+      {playerName && <div className="game-card__title">{playerName}</div>}
       <div className="game-card__desc">{card.description}</div>
 
       {scoring && (

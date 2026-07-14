@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.10.0";
+export const APP_VERSION = "2.0.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,22 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "2.0.0",
+    title: "Full card refresh",
+    changes: [
+      "Brand new card set with updated wording throughout",
+      "Cards no longer have a title - your name shows on the card instead, so every card reads like it's talking to you",
+      "Difficulty is now fully random each game instead of ramping up, so you can't save your ×2 for a guaranteed big card",
+      "Removed the Extreme difficulty - those cards moved to Hard",
+      "Difficulty pickers are now colour-coded across the whole button (green Easy, cyan Medium, yellow Hard)",
+      "Mini Game is now a no-points, just-for-fun category (like Group); the old winner-picking mechanic is still available for custom categories",
+      "Renamed Ongoing to Task and Group Round to Group",
+      "Some challenge cards can name a random other player automatically",
+      "Swapping a card now cancels an armed ×2 - the button warns you before you tap it",
+      "Added a power-up icon to ×2 Double Points",
+    ],
+  },
   {
     version: "1.10.0",
     title: "Auto-updating cards & polish",

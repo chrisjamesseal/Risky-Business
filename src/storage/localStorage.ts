@@ -17,7 +17,7 @@ const META_KEY = "riskit.library.meta.v1";
  * haven't customised their library will pull in the new defaults automatically
  * on the next load; customised libraries are left untouched.
  */
-export const LIBRARY_VERSION = 3;
+export const LIBRARY_VERSION = 5;
 
 interface LibraryMeta {
   version: number;
@@ -158,15 +158,13 @@ export function sanitizeCards(
 function sanitizeCard(value: unknown, validNames: Set<string>): Card | null {
   if (typeof value !== "object" || value === null) return null;
   const v = value as Record<string, unknown>;
-  const title = typeof v.title === "string" ? v.title.trim() : "";
   const description = typeof v.description === "string" ? v.description.trim() : "";
-  if (!title || !description) return null;
+  if (!description) return null;
   if (typeof v.category !== "string" || !validNames.has(v.category)) return null;
   if (!isOneOf(v.difficulty, DIFFICULTIES)) return null;
   if (!isOneOf(v.location, CARD_LOCATIONS)) return null;
   return {
     id: typeof v.id === "string" && v.id ? v.id : makeId(),
-    title,
     description,
     category: v.category,
     difficulty: v.difficulty,

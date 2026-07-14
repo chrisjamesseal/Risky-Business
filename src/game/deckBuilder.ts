@@ -18,18 +18,11 @@ function cardScores(card: Card, behavior: BehaviorByCategory): boolean {
 }
 
 export interface Deck {
-  /** Scoring cards in play order (difficulty rises across the game). */
+  /** Scoring cards in play order (difficulty fully randomised, not ramped). */
   scoring: Card[];
-  /** Shuffled non-scoring interludes (Group Rounds). */
+  /** Shuffled non-scoring interludes (Group cards). */
   interludes: Card[];
 }
-
-const DIFFICULTY_INDEX: Record<Difficulty, number> = {
-  Easy: 0,
-  Medium: 1,
-  Hard: 2,
-  Extreme: 3,
-};
 
 /** A card is usable in a location if it targets that location or "All". */
 export function isUsableInLocation(
@@ -60,12 +53,14 @@ export function scoringCardsFor(
 }
 
 /**
- * Build a balanced deck for a game.
+ * Build a deck for a game.
  *
- * - Only scoring cards of the chosen `difficulties` are used, with difficulty
- *   rising over the course of the game.
- * - Repeats are avoided until the available pool for a tier is exhausted, at
- *   which point that tier's pool is reshuffled so play can continue.
+ * - Only scoring cards of the chosen `difficulties` are used, drawn in a fully
+ *   random order (not ramped harder over the game - a rising curve lets
+ *   players save lifelines for a predictable late-game spike, so difficulty
+ *   is shuffled instead).
+ * - Repeats are avoided until the pool is exhausted, at which point it's
+ *   reshuffled so play can continue.
  * - A `buffer` of extra scoring cards is appended so Swap lifelines have
  *   material to draw from without ending the game early.
  * - Non-scoring "group" interludes are always available regardless of difficulty.
@@ -87,88 +82,33 @@ export function buildDeck(
     (c) => cardScores(c, behavior) && difficulties.includes(c.difficulty),
   );
   // Interludes = cards of a known non-scoring (group) category.
-  const interludePool = usable.filter(
-    (c) => behavior[c.category] === "group",
-  );
+  const interludePool = usable.filter((c) => behavior[c.category] === "group");
 
   const total = scoringCount + buffer;
-  const scoring = pickWithRisingDifficulty(scoringPool, total, rng);
+  const scoring = pickRandom(scoringPool, total, rng);
   const interludes = shuffle(interludePool, rng);
 
   return { scoring, interludes };
 }
 
-/** Group cards by difficulty and shuffle each bucket. */
-function bucketByDifficulty(
-  cards: readonly Card[],
-  rng: Rng,
-): Record<Difficulty, Card[]> {
-  const buckets = {
-    Easy: [] as Card[],
-    Medium: [] as Card[],
-    Hard: [] as Card[],
-    Extreme: [] as Card[],
-  } satisfies Record<Difficulty, Card[]>;
-  for (const card of cards) buckets[card.difficulty].push(card);
-  for (const diff of DIFFICULTIES) buckets[diff] = shuffle(buckets[diff], rng);
-  return buckets;
-}
-
-function pickWithRisingDifficulty(
-  pool: readonly Card[],
-  count: number,
-  rng: Rng,
-): Card[] {
+/**
+ * Draw `count` cards from `pool` in fully shuffled order. Cards are not
+ * repeated until the pool has been exhausted, at which point it's reshuffled
+ * so play can continue past the size of the library.
+ */
+function pickRandom(pool: readonly Card[], count: number, rng: Rng): Card[] {
   if (count <= 0 || pool.length === 0) return [];
 
-  const buckets = bucketByDifficulty(pool, rng);
-  const cursors: Record<Difficulty, number> = {
-    Easy: 0,
-    Medium: 0,
-    Hard: 0,
-    Extreme: 0,
-  };
-  const nonEmptyTiers = DIFFICULTIES.filter((d) => buckets[d].length > 0);
-
+  let shuffled = shuffle(pool, rng);
+  let cursor = 0;
   const result: Card[] = [];
   for (let i = 0; i < count; i++) {
-    const progress = count === 1 ? 0.5 : i / (count - 1);
-    // Target tier 0..3 rising with progress, plus a little jitter so the
-    // curve feels organic rather than strictly stepped.
-    const jitter = (rng() - 0.5) * 1.2;
-    const target = clamp(Math.round(progress * 3 + jitter), 0, 3);
-
-    const chosenTier = nearestAvailableTier(target, nonEmptyTiers);
-    const bucket = buckets[chosenTier];
-
-    // Draw the next unused card; reshuffle the bucket if we've run through it.
-    if (cursors[chosenTier] >= bucket.length) {
-      buckets[chosenTier] = shuffle(bucket, rng);
-      cursors[chosenTier] = 0;
+    if (cursor >= shuffled.length) {
+      shuffled = shuffle(pool, rng);
+      cursor = 0;
     }
-    result.push(buckets[chosenTier][cursors[chosenTier]]);
-    cursors[chosenTier] += 1;
+    result.push(shuffled[cursor]);
+    cursor += 1;
   }
   return result;
-}
-
-/** Find the non-empty tier closest to `target` (ties prefer the lower tier). */
-function nearestAvailableTier(
-  target: number,
-  nonEmptyTiers: readonly Difficulty[],
-): Difficulty {
-  let best = nonEmptyTiers[0];
-  let bestDist = Infinity;
-  for (const tier of nonEmptyTiers) {
-    const dist = Math.abs(DIFFICULTY_INDEX[tier] - target);
-    if (dist < bestDist) {
-      bestDist = dist;
-      best = tier;
-    }
-  }
-  return best;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
 }

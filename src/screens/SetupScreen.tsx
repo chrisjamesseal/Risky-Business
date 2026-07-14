@@ -90,7 +90,7 @@ export function SetupScreen({
       return;
     }
     const finalNames = trimmed.map((n, i) => n || `Player ${i + 1}`);
-    // Keep difficulties in their natural Easy→Extreme order for the deck.
+    // Keep difficulties in their natural Easy-to-Hard order for the deck.
     const ordered = DIFFICULTIES.filter((d) => difficulties.includes(d));
     onStart({ names: finalNames, location, drinkMode, difficulties: ordered });
   };
@@ -164,12 +164,14 @@ export function SetupScreen({
             <button
               key={d}
               className={
-                "chip" + (difficulties.includes(d) ? " chip--active" : "")
+                "chip chip--diff-" +
+                d +
+                (difficulties.includes(d) ? " chip--active" : "")
               }
               onClick={() => toggleDifficulty(d)}
               aria-pressed={difficulties.includes(d)}
             >
-              <span className={"diff-dot diff-" + d} /> {d} · {DIFFICULTY_POINTS[d]}
+              {d} · {DIFFICULTY_POINTS[d]}
             </button>
           ))}
         </div>

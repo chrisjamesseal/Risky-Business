@@ -76,8 +76,8 @@ export function GameScreen({
                 onClick={() => dispatch({ type: "ARM_DOUBLE" })}
               >
                 {player.doublePointsArmed
-                  ? "×2 ARMED - next card doubles!"
-                  : "×2 Double Points"}
+                  ? "⚡ ×2 ARMED - next card doubles!"
+                  : "⚡ ×2 Double Points"}
               </Button>
             )}
             <p className="handoff__hint muted">
@@ -116,7 +116,7 @@ export function GameScreen({
 
         {state.phase === "card" && state.currentCard && isOngoing && (
           <div className="stack">
-            <GameCard card={state.currentCard} doubled={doubled} />
+            <GameCard card={state.currentCard} playerName={player.name} doubled={doubled} />
             <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
               Keep it up until your next turn - the group checks then for +{stake}.
             </p>
@@ -139,7 +139,7 @@ export function GameScreen({
 
         {state.phase === "card" && state.currentCard && isMini && (
           <div className="stack">
-            <GameCard card={state.currentCard} doubled={doubled} />
+            <GameCard card={state.currentCard} playerName={player.name} doubled={doubled} />
             <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
               Everyone plays - then tap who won for +{stake}.
             </p>
@@ -168,7 +168,7 @@ export function GameScreen({
 
         {state.phase === "card" && state.currentCard && !isOngoing && !isMini && (
           <div className="stack">
-            <GameCard card={state.currentCard} doubled={doubled} />
+            <GameCard card={state.currentCard} playerName={player.name} doubled={doubled} />
             <div className="btn-row">
               <Button
                 variant="success"
@@ -188,12 +188,14 @@ export function GameScreen({
 
         {state.phase === "card" && state.currentCard && !player.swapUsed && (
           <Button
-            variant="default"
+            variant={player.doublePointsArmed ? "danger" : "default"}
             block
-            className="btn--muted"
+            className={player.doublePointsArmed ? undefined : "btn--muted"}
             onClick={() => dispatch({ type: "SWAP" })}
           >
-            🔄 Swap this card · -50
+            {player.doublePointsArmed
+              ? "🔄 Swap - loses your ⚡×2! · -50"
+              : "🔄 Swap this card · -50"}
           </Button>
         )}
 
@@ -203,11 +205,10 @@ export function GameScreen({
             <p className="handoff__label">Task check for</p>
             <p className="handoff__name">{player.name}</p>
             <p style={{ fontSize: 17, lineHeight: 1.4 }}>
-              Did they keep up{" "}
+              Did {player.name} keep up:{" "}
               <span style={{ color: "var(--orange)" }}>
-                “{player.pendingMission.title}”
+                "{player.pendingMission.description}"
               </span>
-              ?
             </p>
             <div className="btn-row">
               <Button

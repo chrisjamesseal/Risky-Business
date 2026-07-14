@@ -31,7 +31,7 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
 
         <div className="help-block">
           <div className="help-block__title">⭐ Points</div>
-          <p>Easy 100 · Medium 200 · Hard 300 · Extreme 500.</p>
+          <p>Easy 100 · Medium 200 · Hard 300. Difficulty is fully random each game.</p>
         </div>
 
         <div className="help-block">

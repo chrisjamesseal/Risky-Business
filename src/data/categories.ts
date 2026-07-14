@@ -25,15 +25,7 @@ export const DEFAULT_CATEGORIES: CategoryDef[] = [
     description: "A quick skill or feat to pull off on the spot.",
   },
   {
-    name: "Mini Game",
-    behavior: "mini",
-    icon: "🕹️",
-    color: "var(--green)",
-    description:
-      "A group game with a winner - play it, then pick who won for the points.",
-  },
-  {
-    name: "Ongoing",
+    name: "Task",
     behavior: "ongoing",
     icon: "⏳",
     color: "var(--orange)",
@@ -41,10 +33,17 @@ export const DEFAULT_CATEGORIES: CategoryDef[] = [
       "Keep a task going until your next turn - the group checks then.",
   },
   {
-    name: "Group Round",
+    name: "Mini Game",
+    behavior: "group",
+    icon: "🕹️",
+    color: "var(--green)",
+    description: "A quick group game or question. Just for fun, no points.",
+  },
+  {
+    name: "Group",
     behavior: "group",
     icon: "🎉",
     color: "var(--purple)",
-    description: "A random game or question with no winner. Just for fun, no points.",
+    description: "A social or knockout group game. Just for fun, no points.",
   },
 ];
