@@ -43,7 +43,7 @@ export function Leaderboard({
                       : "Double Points available"
                 }
               >
-                ×2
+                ⚡×2
               </span>
               <span
                 className={"lb-life" + (player.swapUsed ? " lb-life--used" : "")}

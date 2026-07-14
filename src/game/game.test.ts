@@ -83,45 +83,44 @@ describe("location filtering", () => {
   });
 });
 
-describe("default library balance", () => {
-  it("has Group Round cards, and they are non-scoring", () => {
-    const rounds = DEFAULT_CARDS.filter((c) => c.category === "Group Round");
+describe("difficulty tiers", () => {
+  it("no longer includes Extreme", () => {
+    expect(DIFFICULTIES as readonly string[]).not.toContain("Extreme");
+    expect(DIFFICULTIES).toEqual(["Easy", "Medium", "Hard"]);
+    expect(DEFAULT_CARDS.some((c) => (c.difficulty as string) === "Extreme")).toBe(
+      false,
+    );
+  });
+});
+
+describe("default library", () => {
+  it("has Group cards, and they are non-scoring", () => {
+    const rounds = DEFAULT_CARDS.filter((c) => c.category === "Group");
     expect(rounds.length).toBeGreaterThan(0);
     expect(rounds.every((c) => !scores(c.category))).toBe(true);
-    // Group-only games must not linger as scoring Mini Games.
-    const titles = DEFAULT_CARDS.filter(
-      (c) => c.category === "Mini Game",
-    ).map((c) => c.title);
-    expect(titles).not.toContain("Never Have I Ever");
-    expect(titles).not.toContain("Would You Rather");
   });
 
-  it("keeps truths at Easy or Medium so big points require action cards", () => {
-    const truths = DEFAULT_CARDS.filter((c) => c.category === "Truth");
-    expect(truths.length).toBeGreaterThan(0);
-    for (const t of truths) {
-      expect(["Easy", "Medium"]).toContain(t.difficulty);
-    }
+  it("has Mini Game cards, and they are non-scoring (just for fun)", () => {
+    const minis = DEFAULT_CARDS.filter((c) => c.category === "Mini Game");
+    expect(minis.length).toBeGreaterThan(0);
+    expect(minis.every((c) => !scores(c.category))).toBe(true);
   });
 
-  it("every location offers an Extreme action card for late-game turns", () => {
-    for (const location of LOCATIONS) {
-      const usable = cardsForLocation(DEFAULT_CARDS, location);
-      const extreme = usable.filter(
-        (c) => c.difficulty === "Extreme" && c.category !== "Truth",
-      );
-      expect(extreme.length).toBeGreaterThan(0);
-    }
+  it("has Task cards (deferred, checked at the next turn), and they score", () => {
+    const tasks = DEFAULT_CARDS.filter((c) => c.category === "Task");
+    expect(tasks.length).toBeGreaterThan(0);
+    expect(tasks.every((c) => scores(c.category))).toBe(true);
   });
 
-  it("every location has enough scoring cards for an 8-player game", () => {
-    const needed = 8 * SCORING_TURNS_PER_PLAYER; // 40
-    for (const location of LOCATIONS) {
-      const scoring = cardsForLocation(DEFAULT_CARDS, location).filter((c) =>
-        scores(c.category),
-      );
-      expect(scoring.length).toBeGreaterThanOrEqual(needed);
-    }
+  it("has no card left over without a matching category", () => {
+    const names = new Set(DEFAULT_CATEGORIES.map((c) => c.name));
+    expect(DEFAULT_CARDS.every((c) => names.has(c.category))).toBe(true);
+  });
+
+  it("has an {opponent}-token card for random-opponent challenges", () => {
+    expect(DEFAULT_CARDS.some((c) => c.description.includes("{opponent}"))).toBe(
+      true,
+    );
   });
 });
 
@@ -139,12 +138,8 @@ describe("deck builds for every player count and location", () => {
           players, // deterministic seed
         );
         expect(deck.scoring.length).toBe(scoringNeeded + players);
-        expect(deck.scoring.every((c) => scores(c.category))).toBe(
-          true,
-        );
-        expect(
-          deck.interludes.every((c) => !scores(c.category)),
-        ).toBe(true);
+        expect(deck.scoring.every((c) => scores(c.category))).toBe(true);
+        expect(deck.interludes.every((c) => !scores(c.category))).toBe(true);
       }
     }
   });
@@ -157,15 +152,15 @@ describe("buildDeck", () => {
     expect(deck.scoring.every((c) => scores(c.category))).toBe(true);
   });
 
-  it("puts Group Rounds in the interlude pool, not the scoring deck", () => {
+  it("puts Group and Mini Game cards in the interlude pool, not the scoring deck", () => {
     const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 20, 0, 3);
-    expect(deck.interludes.every((c) => c.category === "Group Round")).toBe(
-      true,
-    );
+    expect(
+      deck.interludes.every((c) => c.category === "Group" || c.category === "Mini Game"),
+    ).toBe(true);
     expect(deck.interludes.length).toBeGreaterThan(0);
-    expect(deck.scoring.some((c) => c.category === "Group Round")).toBe(false);
-    // Ongoing cards are scoring, so they belong in the scoring deck.
-    expect(deck.scoring.some((c) => c.category === "Ongoing")).toBe(true);
+    expect(deck.scoring.some((c) => c.category === "Group")).toBe(false);
+    // Task cards are scoring, so they belong in the scoring deck.
+    expect(deck.scoring.some((c) => c.category === "Task")).toBe(true);
   });
 
   it("only includes location-appropriate cards", () => {
@@ -175,14 +170,23 @@ describe("buildDeck", () => {
     }
   });
 
-  it("trends from easier to harder over the game", () => {
-    const points = { Easy: 1, Medium: 2, Hard: 3, Extreme: 4 } as const;
-    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 40, 0, 99);
-    const firstHalf = deck.scoring.slice(0, 20);
-    const secondHalf = deck.scoring.slice(20);
-    const avg = (cards: Card[]) =>
-      cards.reduce((s, c) => s + points[c.difficulty], 0) / cards.length;
-    expect(avg(secondHalf)).toBeGreaterThan(avg(firstHalf));
+  it("does not force an easy-to-hard ramp - difficulty is shuffled", () => {
+    // A pool where difficulty is fully distinguishable by id.
+    const pool: Card[] = [
+      { id: "e1", description: "e1", category: "Truth", difficulty: "Easy", location: "All" },
+      { id: "e2", description: "e2", category: "Truth", difficulty: "Easy", location: "All" },
+      { id: "h1", description: "h1", category: "Truth", difficulty: "Hard", location: "All" },
+      { id: "h2", description: "h2", category: "Truth", difficulty: "Hard", location: "All" },
+    ];
+    const cats: CategoryDef[] = [
+      { name: "Truth", behavior: "standard", icon: "", color: "", description: "" },
+    ];
+    // Across several seeds, a Hard card should turn up first at least once -
+    // a rising-difficulty curve would never allow that.
+    const firstIsHard = Array.from({ length: 20 }, (_, seed) =>
+      buildDeck(pool, cats, "Home", 4, 0, seed).scoring[0].difficulty,
+    ).some((d) => d === "Hard");
+    expect(firstIsHard).toBe(true);
   });
 
   it("is deterministic for a given seed", () => {
@@ -197,8 +201,8 @@ describe("buildDeck", () => {
       { name: "Fun", behavior: "group", icon: "!", color: "", description: "" },
     ];
     const cards: Card[] = [
-      { id: "q1", title: "q", description: "d", category: "Q", difficulty: "Easy", location: "All" },
-      { id: "f1", title: "f", description: "d", category: "Fun", difficulty: "Easy", location: "All" },
+      { id: "q1", description: "d", category: "Q", difficulty: "Easy", location: "All" },
+      { id: "f1", description: "d", category: "Fun", difficulty: "Easy", location: "All" },
     ];
     const deck = buildDeck(cards, cats, "Home", 4, 0, 1);
     expect(deck.scoring.every((c) => c.category === "Q")).toBe(true);
@@ -210,11 +214,11 @@ describe("buildDeck", () => {
 describe("scoring", () => {
   it("awards difficulty points, doubled when armed", () => {
     const easy = DEFAULT_CARDS.find((c) => c.difficulty === "Easy")!;
-    const extreme = DEFAULT_CARDS.find((c) => c.difficulty === "Extreme")!;
+    const hard = DEFAULT_CARDS.find((c) => c.difficulty === "Hard")!;
     expect(cardPoints(easy, false)).toBe(100);
     expect(cardPoints(easy, true)).toBe(200);
-    expect(cardPoints(extreme, false)).toBe(500);
-    expect(cardPoints(extreme, true)).toBe(1000);
+    expect(cardPoints(hard, false)).toBe(300);
+    expect(cardPoints(hard, true)).toBe(600);
   });
 
   it("ranks players by score, stable on ties", () => {
@@ -326,6 +330,21 @@ describe("game reducer", () => {
     expect(state.players[0].score).toBe(score);
   });
 
+  it("swapping while ×2 is armed cancels the bonus but doesn't burn the lifeline", () => {
+    let state = createGame(config);
+    state = gameReducer(state, { type: "ARM_DOUBLE" });
+    state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+    expect(state.players[0].doublePointsArmed).toBe(true);
+    state = gameReducer(state, { type: "SWAP" });
+    expect(state.players[0].doublePointsArmed).toBe(false);
+    expect(state.players[0].doublePointsUsed).toBe(false); // not burned
+    // Completing the swapped-in card is not doubled.
+    const expected = cardPoints(state.currentCard!, false);
+    const before = state.players[0].score;
+    state = gameReducer(state, { type: "COMPLETE" });
+    expect(state.players[0].score).toBe(before + expected);
+  });
+
   it("finishes after every player completes their scoring turns", () => {
     let state: GameState = createGame(config);
     let guard = 0;
@@ -348,37 +367,69 @@ describe("game reducer", () => {
   });
 });
 
-describe("chaos removed", () => {
-  it("has no Chaos Event cards or category", () => {
-    expect(DEFAULT_CATEGORIES.map((c) => c.name)).not.toContain("Chaos Event");
-    expect(
-      DEFAULT_CARDS.some((c) => c.category === "Chaos Event"),
-    ).toBe(false);
+describe("opponent name token", () => {
+  const tokenCard: Card = {
+    id: "opp",
+    description: "Arm wrestle {opponent}.",
+    category: "Truth",
+    difficulty: "Easy",
+    location: "All",
+  };
+  const cfg = gameConfig({
+    names: ["Ann", "Ben", "Cid"],
+    cards: [tokenCard],
+    seed: 7,
+  });
+
+  it("replaces {opponent} with a different player's name on reveal", () => {
+    const state = gameReducer(createGame(cfg), { type: "REVEAL", roll: 0.9 });
+    const desc = state.currentCard!.description;
+    expect(desc).not.toContain("{opponent}");
+    expect(desc).toContain("Arm wrestle");
+    // The named opponent must not be the current player (Ann).
+    expect(desc).not.toContain("Arm wrestle Ann.");
+    expect(desc === "Arm wrestle Ben." || desc === "Arm wrestle Cid.").toBe(true);
+  });
+
+  it("leaves cards without the token untouched", () => {
+    const plain: Card = { ...tokenCard, id: "plain", description: "Do a dance." };
+    const state = gameReducer(
+      createGame(gameConfig({ cards: [plain], seed: 1 })),
+      { type: "REVEAL", roll: 0.9 },
+    );
+    expect(state.currentCard!.description).toBe("Do a dance.");
   });
 });
 
-describe("Mini Games (winner picks up the points)", () => {
-  const mini: Card = {
-    id: "mg",
-    title: "Categories",
+describe("Mini Game category (no points, just for fun)", () => {
+  it("the default Mini Game category does not score", () => {
+    const miniCards = DEFAULT_CARDS.filter((c) => c.category === "Mini Game");
+    expect(miniCards.length).toBeGreaterThan(0);
+    expect(miniCards.every((c) => !scores(c.category))).toBe(true);
+  });
+});
+
+describe("the 'mini' winner behaviour (available for custom categories)", () => {
+  const winnerCat: CategoryDef = {
+    name: "Winner Game",
+    behavior: "mini",
+    icon: "🏆",
+    color: "",
+    description: "",
+  };
+  const card: Card = {
+    id: "wg",
     description: "play",
-    category: "Mini Game",
+    category: "Winner Game",
     difficulty: "Medium",
     location: "All",
   };
-
-  it("has default Mini Games, and they are scoring", () => {
-    const games = DEFAULT_CARDS.filter((c) => c.category === "Mini Game");
-    expect(games.length).toBeGreaterThan(0);
-    expect(games.every((c) => scores(c.category))).toBe(true);
-    // The old solo mini-games moved out.
-    expect(games.map((c) => c.title)).not.toContain("Coaster Toss");
-  });
+  const cfg = gameConfig({ cards: [card], categories: [winnerCat], seed: 4 });
 
   it("awards the card's points to the chosen winner", () => {
-    let state = createGame(gameConfig({ cards: [mini], seed: 4 }));
+    let state = createGame(cfg);
     state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
-    expect(state.currentCard?.category).toBe("Mini Game");
+    expect(state.currentCard?.category).toBe("Winner Game");
     const winner = state.players[1];
     state = gameReducer(state, { type: "AWARD_MINI", winnerId: winner.id });
     expect(state.phase).toBe("result");
@@ -390,7 +441,7 @@ describe("Mini Games (winner picks up the points)", () => {
   });
 
   it("awards nothing when there's no winner", () => {
-    let state = createGame(gameConfig({ cards: [mini], seed: 4 }));
+    let state = createGame(cfg);
     state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
     state = gameReducer(state, { type: "AWARD_MINI", winnerId: null });
     expect(state.players.every((p) => p.score === 0)).toBe(true);
@@ -399,30 +450,27 @@ describe("Mini Games (winner picks up the points)", () => {
   });
 });
 
-describe("Ongoing tasks", () => {
-  const card = (id: string, category: Card["category"]): Card => ({
+describe("Task cards (Ongoing behaviour, deferred to next turn)", () => {
+  const card = (id: string): Card => ({
     id,
-    title: id === "on" ? "Accent" : id,
     description: "do a thing",
-    category,
+    category: "Task",
     difficulty: "Easy",
     location: "All",
   });
 
-  it("has Ongoing cards, and they are scoring", () => {
-    const ongoing = DEFAULT_CARDS.filter((c) => c.category === "Ongoing");
-    expect(ongoing.length).toBeGreaterThan(0);
-    expect(ongoing.every((c) => scores(c.category))).toBe(true);
+  it("has Task cards, and they are scoring", () => {
+    const tasks = DEFAULT_CARDS.filter((c) => c.category === "Task");
+    expect(tasks.length).toBeGreaterThan(0);
+    expect(tasks.every((c) => scores(c.category))).toBe(true);
   });
 
-  // A deck where every scoring card is an Ongoing "Accent" task.
-  const cfg = gameConfig({ cards: [card("on", "Ongoing")], seed: 2 });
+  const cfg = gameConfig({ cards: [card("on")], seed: 2 });
 
   it("defers points: start now, check and score at the next turn", () => {
     let state = createGame(cfg);
-    // Reveal Player A's ongoing card (roll high = no interlude available anyway)
     state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
-    expect(state.currentCard?.category).toBe("Ongoing");
+    expect(state.currentCard?.category).toBe("Task");
 
     state = gameReducer(state, { type: "START_MISSION" });
     expect(state.phase).toBe("result");

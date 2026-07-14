@@ -60,7 +60,7 @@ export function behaviorByCategory(
   return map;
 }
 
-export const DIFFICULTIES = ["Easy", "Medium", "Hard", "Extreme"] as const;
+export const DIFFICULTIES = ["Easy", "Medium", "Hard"] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];
 
 export const LOCATIONS = ["Home", "Pub", "Club/Festival"] as const;
@@ -70,9 +70,14 @@ export type GameLocation = (typeof LOCATIONS)[number];
 export const CARD_LOCATIONS = ["Home", "Pub", "Club/Festival", "All"] as const;
 export type CardLocation = (typeof CARD_LOCATIONS)[number];
 
+/**
+ * Token in a card description that gets replaced with a random other
+ * player's name when the card is revealed, e.g. "Arm wrestle {opponent}."
+ */
+export const OPPONENT_TOKEN = "{opponent}";
+
 export interface Card {
   id: string;
-  title: string;
   description: string;
   category: Category;
   difficulty: Difficulty;
@@ -81,7 +86,7 @@ export interface Card {
 
 /** An accepted Ongoing task awaiting its check-in at the player's next turn. */
 export interface PendingMission {
-  title: string;
+  description: string;
   points: number;
 }
 
@@ -104,7 +109,6 @@ export const DIFFICULTY_POINTS: Record<Difficulty, number> = {
   Easy: 100,
   Medium: 200,
   Hard: 300,
-  Extreme: 500,
 };
 
 /** Number of scoring turns each player must complete. */

@@ -1,5 +1,6 @@
 import {
   behaviorByCategory,
+  OPPONENT_TOKEN,
   SCORING_TURNS_PER_PLAYER,
   type BehaviorByCategory,
   type Card,
@@ -10,6 +11,26 @@ import {
 } from "../types";
 import { buildDeck } from "./deckBuilder";
 import { cardPoints } from "./scoring";
+
+/**
+ * If a card's description references {@link OPPONENT_TOKEN}, replace it with a
+ * random other player's name so the card reads naturally (e.g. "Arm wrestle
+ * Jess."). Cards without the token are returned unchanged.
+ */
+function resolveOpponentToken(
+  card: Card,
+  players: readonly Player[],
+  currentIndex: number,
+): Card {
+  if (!card.description.includes(OPPONENT_TOKEN)) return card;
+  const others = players.filter((_, i) => i !== currentIndex);
+  if (others.length === 0) return card;
+  const opponent = others[Math.floor(Math.random() * others.length)];
+  return {
+    ...card,
+    description: card.description.split(OPPONENT_TOKEN).join(opponent.name),
+  };
+}
 
 export type TurnPhase = "ready" | "interlude" | "card" | "result" | "checkin";
 
@@ -161,13 +182,19 @@ function armDouble(state: GameState): GameState {
 
 function reveal(state: GameState, roll: number): GameState {
   if (state.phase !== "ready") return state;
-  const [card, ...restScoring] = state.scoringQueue;
-  if (!card) return state; // safety: nothing left to draw
+  const [rawCard, ...restScoring] = state.scoringQueue;
+  if (!rawCard) return state; // safety: nothing left to draw
+  const card = resolveOpponentToken(rawCard, state.players, state.currentPlayerIndex);
 
   const injectInterlude =
     roll < INTERLUDE_CHANCE && state.interludeQueue.length > 0;
   if (injectInterlude) {
-    const [interlude, ...restInterludes] = state.interludeQueue;
+    const [rawInterlude, ...restInterludes] = state.interludeQueue;
+    const interlude = resolveOpponentToken(
+      rawInterlude,
+      state.players,
+      state.currentPlayerIndex,
+    );
     return {
       ...state,
       scoringQueue: restScoring,
@@ -189,18 +216,25 @@ function swap(state: GameState): GameState {
   if (state.phase !== "card" || !state.currentCard) return state;
   const player = state.players[state.currentPlayerIndex];
   if (player.swapUsed) return state;
-  const [replacement, ...rest] = state.scoringQueue;
-  if (!replacement) return state; // nothing to swap to
+  const [rawReplacement, ...rest] = state.scoringQueue;
+  if (!rawReplacement) return state; // nothing to swap to
+  const replacement = resolveOpponentToken(
+    rawReplacement,
+    state.players,
+    state.currentPlayerIndex,
+  );
   return {
     ...state,
     // retired card returns to the back of the queue
     scoringQueue: [...rest, state.currentCard],
     currentCard: replacement,
-    // Swapping costs 100 points.
     players: updateCurrentPlayer(state, (p) => ({
       ...p,
       swapUsed: true,
       score: p.score - SWAP_COST,
+      // Swapping cancels an armed ×2 - you don't get to keep the bonus for a
+      // card you backed out of. The lifeline itself isn't burned, though.
+      doublePointsArmed: false,
     })),
   };
 }
@@ -281,14 +315,14 @@ function startMission(state: GameState): GameState {
   const player = state.players[state.currentPlayerIndex];
   const doubled = player.doublePointsArmed;
   const points = cardPoints(state.currentCard, doubled);
-  const title = state.currentCard.title;
+  const description = state.currentCard.description;
 
   return {
     ...state,
     players: updateCurrentPlayer(state, (p) => ({
       ...p,
       scoringTurnsCompleted: p.scoringTurnsCompleted + 1,
-      pendingMission: { title, points },
+      pendingMission: { description, points },
       doublePointsArmed: false,
       doublePointsUsed: p.doublePointsUsed || doubled,
     })),

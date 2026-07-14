@@ -22,7 +22,6 @@
   --easy: #39ff14;
   --medium: #05d9e8;
   --hard: #ffd319;
-  --extreme: #ff2e88;
 
   --shadow: 4px 4px 0 var(--border);
   --shadow-lg: 6px 6px 0 var(--border);
@@ -372,16 +371,6 @@ select:focus {
   background: var(--cyan);
 }
 
-/* Colour dot for difficulty selectors (green Easy, etc.). */
-.diff-dot {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border: 2px solid var(--border);
-  margin-right: 6px;
-  vertical-align: -1px;
-}
-
 .toggle {
   display: flex;
   align-items: center;
@@ -584,9 +573,32 @@ select:focus {
 .diff-Hard {
   background: var(--hard);
 }
-.diff-Extreme {
-  background: var(--extreme);
-  color: var(--ink);
+
+/* Difficulty picker chips - the whole button takes the difficulty colour,
+   not just an icon, so it reads at a glance. */
+.chip--diff-Easy {
+  border-color: var(--easy);
+  color: var(--easy);
+}
+.chip--diff-Easy.chip--active {
+  background: var(--easy);
+  color: var(--border);
+}
+.chip--diff-Medium {
+  border-color: var(--medium);
+  color: var(--medium);
+}
+.chip--diff-Medium.chip--active {
+  background: var(--medium);
+  color: var(--border);
+}
+.chip--diff-Hard {
+  border-color: var(--hard);
+  color: var(--hard);
+}
+.chip--diff-Hard.chip--active {
+  background: var(--hard);
+  color: var(--border);
 }
 
 /* --------------------------------------------------------------- Game frame */
@@ -913,19 +925,9 @@ select:focus {
 }
 .editor-item__titlerow {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
-}
-.editor-item__title {
-  flex: 1;
-  min-width: 0;
-  font-size: 15px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .editor-item__desc {
   font-size: 12px;
@@ -933,6 +935,12 @@ select:focus {
   line-height: 1.5;
   color: var(--ink-dim);
   white-space: normal;
+}
+.editor-item__desc--main {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--ink);
 }
 .editor-item__meta {
   display: flex;

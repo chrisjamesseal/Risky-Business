@@ -18,7 +18,7 @@ import { makeId, sanitizeCards } from "../storage/localStorage";
 type Draft = Omit<Card, "id"> & { id?: string };
 
 function blankDraft(category: string): Draft {
-  return { title: "", description: "", category, difficulty: "Easy", location: "All" };
+  return { description: "", category, difficulty: "Easy", location: "All" };
 }
 
 /** A single-select row of tappable options (used instead of dropdowns). */
@@ -84,8 +84,8 @@ export function CardEditorScreen({
   );
 
   const upsert = (value: Draft) => {
-    if (!value.title.trim() || !value.description.trim()) {
-      onToast("Title and description are required", true);
+    if (!value.description.trim()) {
+      onToast("Description is required", true);
       return;
     }
     if (value.id) {
@@ -289,10 +289,11 @@ export function CardEditorScreen({
           >
             <span className="editor-item__body">
               <span className="editor-item__titlerow">
-                <span className="editor-item__title">{card.title}</span>
+                <span className="editor-item__desc editor-item__desc--main">
+                  {card.description}
+                </span>
                 <span className="editor-item__edit">✎ Edit</span>
               </span>
-              <span className="editor-item__desc">{card.description}</span>
               <span className="editor-item__meta">
                 {activeCategory && isScoringBehavior(activeCategory.behavior) ? (
                   <DifficultyBadge difficulty={card.difficulty} />
@@ -468,15 +469,14 @@ function CardForm({
 
   const preview: Card = {
     id: value.id ?? "preview",
-    title: value.title.trim() || "Card title",
-    description: value.description.trim() || "Card description shows here…",
+    description: value.description.trim() || "Card description shows here...",
     category: value.category,
     difficulty: value.difficulty,
     location: value.location,
   };
 
   const confirmDelete = () => {
-    if (onDelete && window.confirm(`Delete "${value.title || "this card"}"?`)) {
+    if (onDelete && window.confirm("Delete this card?")) {
       onDelete();
     }
   };
@@ -491,19 +491,7 @@ function CardForm({
       </div>
 
       <div className="section-title">Preview</div>
-      <GameCard card={preview} />
-
-      <div className="field">
-        <label htmlFor="title">Title</label>
-        <input
-          id="title"
-          type="text"
-          value={value.title}
-          maxLength={40}
-          autoFocus
-          onChange={(e) => set("title", e.target.value)}
-        />
-      </div>
+      <GameCard card={preview} playerName="Player Name" />
 
       <div className="field">
         <label htmlFor="desc">Description</label>
@@ -513,9 +501,14 @@ function CardForm({
           className="textarea--grow"
           value={value.description}
           maxLength={240}
+          autoFocus
           onChange={(e) => set("description", e.target.value)}
         />
         <span className="field__count">{value.description.length}/240</span>
+        <span className="field__hint">
+          Tip: use {"{opponent}"} to insert a random other player's name, e.g.
+          "Arm wrestle {"{opponent}"}."
+        </span>
       </div>
 
       <div className="field">
@@ -534,11 +527,15 @@ function CardForm({
             {DIFFICULTIES.map((d) => (
               <button
                 key={d}
-                className={"chip" + (value.difficulty === d ? " chip--active" : "")}
+                className={
+                  "chip chip--diff-" +
+                  d +
+                  (value.difficulty === d ? " chip--active" : "")
+                }
                 onClick={() => set("difficulty", d)}
                 aria-pressed={value.difficulty === d}
               >
-                <span className={"diff-dot diff-" + d} /> {d}
+                {d}
               </button>
             ))}
           </div>
