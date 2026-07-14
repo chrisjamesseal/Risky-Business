@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Risk It — pixel arcade theme. Fully offline: no external fonts or assets.
+   Risk It - pixel arcade theme. Fully offline: no external fonts or assets.
    =========================================================================== */
 
 :root {
@@ -208,7 +208,13 @@ h3 {
   box-shadow: none;
   border-color: transparent;
 }
-/* Present but understated — for secondary actions like Swap. */
+/* Outlined secondary CTA - coloured border, no fill. */
+.btn--outline {
+  background: transparent;
+  color: var(--cyan);
+  border-color: var(--cyan);
+}
+/* Present but understated - for secondary actions like Swap. */
 .btn--muted {
   background: var(--panel-2);
   color: var(--ink-dim);
@@ -366,6 +372,16 @@ select:focus {
   background: var(--cyan);
 }
 
+/* Colour dot for difficulty selectors (green Easy, etc.). */
+.diff-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border);
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
 .toggle {
   display: flex;
   align-items: center;
@@ -382,7 +398,7 @@ select:focus {
   cursor: pointer;
 }
 
-/* Location picker — full-width rows so long labels never clip. */
+/* Location picker - full-width rows so long labels never clip. */
 .loc-list {
   display: flex;
   flex-direction: column;
@@ -415,7 +431,7 @@ select:focus {
   background: var(--cyan);
 }
 
-/* Card editor category tabs — icon plus a short label. */
+/* Card editor category tabs - icon plus a short label. */
 .cat-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -860,7 +876,7 @@ select:focus {
   color: var(--yellow);
 }
 
-/* Card editor list rows — tap to edit, clear enable toggle. */
+/* Card editor list rows - tap to edit, clear enable toggle. */
 .editor-item {
   display: flex;
   gap: 8px;

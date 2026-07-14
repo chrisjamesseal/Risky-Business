@@ -69,23 +69,23 @@ export function GameScreen({
             <p className="handoff__name">{player.name}</p>
             {!player.doublePointsUsed && (
               <Button
-                variant={player.doublePointsArmed ? "warn" : "secondary"}
+                variant={player.doublePointsArmed ? "warn" : "outline"}
                 large
                 block
                 disabled={player.doublePointsArmed}
                 onClick={() => dispatch({ type: "ARM_DOUBLE" })}
               >
                 {player.doublePointsArmed
-                  ? "×2 ARMED — next card doubles!"
+                  ? "×2 ARMED - next card doubles!"
                   : "×2 Double Points"}
               </Button>
             )}
             <p className="handoff__hint muted">
               {player.doublePointsArmed
-                ? "Locked in — reveal your card."
+                ? "Locked in - reveal your card."
                 : player.doublePointsUsed
                   ? " "
-                  : "Gamble your ×2 before revealing — it locks once the card is out."}
+                  : "Gamble your ×2 before revealing - it locks once the card is out."}
             </p>
             <Button
               variant="primary"
@@ -102,7 +102,7 @@ export function GameScreen({
           <div className="stack">
             <GameCard card={state.pendingInterlude} />
             <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
-              Everyone joins in — no points. Then {player.name}'s card.
+              Everyone joins in - no points. Then {player.name}'s card.
             </p>
             <Button
               variant="secondary"
@@ -118,7 +118,7 @@ export function GameScreen({
           <div className="stack">
             <GameCard card={state.currentCard} doubled={doubled} />
             <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
-              Keep it up until your next turn — the group checks then for +{stake}.
+              Keep it up until your next turn - the group checks then for +{stake}.
             </p>
             <div className="btn-row">
               <Button
@@ -141,7 +141,7 @@ export function GameScreen({
           <div className="stack">
             <GameCard card={state.currentCard} doubled={doubled} />
             <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
-              Everyone plays — then tap who won for +{stake}.
+              Everyone plays - then tap who won for +{stake}.
             </p>
             <div className="winner-grid">
               {state.players.map((p) => (
@@ -193,7 +193,7 @@ export function GameScreen({
             className="btn--muted"
             onClick={() => dispatch({ type: "SWAP" })}
           >
-            🔄 Swap this card · −100
+            🔄 Swap this card · -50
           </Button>
         )}
 
@@ -238,7 +238,7 @@ export function GameScreen({
                   ⏳
                 </div>
                 <div className="award__label">
-                  Task started — checked at your next turn
+                  Task started - checked at your next turn
                 </div>
               </div>
             ) : (

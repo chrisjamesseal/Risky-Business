@@ -530,11 +530,18 @@ function CardForm({
       {scoring ? (
         <div className="field">
           <label>Difficulty</label>
-          <ChipSelect
-            options={DIFFICULTIES}
-            value={value.difficulty}
-            onChange={(d) => set("difficulty", d)}
-          />
+          <div className="chip-row">
+            {DIFFICULTIES.map((d) => (
+              <button
+                key={d}
+                className={"chip" + (value.difficulty === d ? " chip--active" : "")}
+                onClick={() => set("difficulty", d)}
+                aria-pressed={value.difficulty === d}
+              >
+                <span className={"diff-dot diff-" + d} /> {d}
+              </button>
+            ))}
+          </div>
         </div>
       ) : (
         <p className="muted" style={{ fontSize: 12 }}>

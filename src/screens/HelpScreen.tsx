@@ -42,7 +42,7 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
                 <b>
                   {c.icon} {c.name}
                 </b>{" "}
-                — {c.description}
+                - {c.description}
                 <br />
               </span>
             ))}
@@ -52,16 +52,16 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
         <div className="help-block">
           <div className="help-block__title">🎁 Lifelines (once each)</div>
           <p>
-            <b>×2 Double</b> — arm it before revealing to double the next card.
+            <b>×2 Double</b> - arm it before revealing to double the next card.
             <br />
-            <b>🔄 Swap</b> — ditch a card you don't fancy and draw another.
+            <b>🔄 Swap</b> - ditch a card you don't fancy and draw another.
           </p>
         </div>
 
         <div className="help-block">
           <div className="help-block__title">🍺 Drink Mode</div>
           <p>
-            Optional. No drinking during play — drinks are handed out at the end
+            Optional. No drinking during play - drinks are handed out at the end
             by finishing place.
           </p>
         </div>

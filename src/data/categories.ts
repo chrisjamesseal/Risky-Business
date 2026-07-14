@@ -30,7 +30,7 @@ export const DEFAULT_CATEGORIES: CategoryDef[] = [
     icon: "🕹️",
     color: "var(--green)",
     description:
-      "A group game with a winner — play it, then pick who won for the points.",
+      "A group game with a winner - play it, then pick who won for the points.",
   },
   {
     name: "Ongoing",
@@ -38,7 +38,7 @@ export const DEFAULT_CATEGORIES: CategoryDef[] = [
     icon: "⏳",
     color: "var(--orange)",
     description:
-      "Keep a task going until your next turn — the group checks then.",
+      "Keep a task going until your next turn - the group checks then.",
   },
   {
     name: "Group Round",

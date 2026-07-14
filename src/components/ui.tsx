@@ -8,6 +8,7 @@ type Variant =
   | "warn"
   | "danger"
   | "ghost"
+  | "outline"
   | "default";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
