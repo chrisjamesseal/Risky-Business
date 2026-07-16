@@ -88,7 +88,7 @@ export const LOCATION_ICON: Record<GameLocation, string> = {
 export const OPPONENT_TOKEN = "{opponent}";
 export const OPPONENT_TOKEN_RE = /\{\s*opponent\s*\}/gi;
 
-export const DURATIONS = ["1 min", "2 min", "5 min", "Until next turn"] as const;
+export const DURATIONS = ["1 round", "2 rounds", "3 rounds", "Next round"] as const;
 export type Duration = (typeof DURATIONS)[number];
 
 export interface Card {
@@ -132,8 +132,7 @@ export const DIFFICULTY_POINTS: Record<Difficulty, number> = {
 export const SCORING_TURNS_PER_PLAYER = 5;
 
 /** Rounds-per-player choices offered at setup. */
-export const ROUND_OPTIONS = [1, 3, 5] as const;
+export const ROUND_OPTIONS = [3, 5, 10] as const;
 
-/** Rough time a single card takes to play out, for the setup time estimate. */
-export const MINUTES_PER_CARD_MIN = 1;
-export const MINUTES_PER_CARD_MAX = 3;
+/** Average time a single card takes to play out, for the setup time estimate. */
+export const AVG_MINUTES_PER_CARD = 2;

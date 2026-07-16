@@ -250,19 +250,30 @@ export function CardEditorScreen({
   return (
     <div className="screen">
       <div className="topbar">
-        <button className="icon-btn" onClick={onBack} aria-label="Back">
+        <button className="icon-btn icon-btn--plain" onClick={onBack} aria-label="Back">
           ⬅️
         </button>
         <h2>Card Editor</h2>
       </div>
 
-      <input
-        type="text"
-        className="search-input"
-        placeholder="🔍 Search all cards..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="search-row">
+        <input
+          type="text"
+          className="search-input"
+          placeholder="🔍 Search all cards..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        {searching && (
+          <button
+            className="icon-btn icon-btn--plain"
+            onClick={() => setSearch("")}
+            aria-label="Clear search"
+          >
+            ❌
+          </button>
+        )}
+      </div>
 
       {!searching && (
         <>
@@ -392,7 +403,7 @@ function CategoryForm({
   return (
     <div className="screen">
       <div className="topbar">
-        <button className="icon-btn" onClick={onCancel} aria-label="Cancel">
+        <button className="icon-btn icon-btn--plain" onClick={onCancel} aria-label="Cancel">
           ⬅️
         </button>
         <h2>{draft.originalName ? "Edit Category" : "New Category"}</h2>
@@ -500,7 +511,7 @@ function CardForm({
     el.style.height = `${el.scrollHeight + borders}px`;
   }, [value.description]);
 
-  const preview: Card = {
+  const previewCard: Card = {
     id: value.id ?? "preview",
     description: value.description.trim() || "Card description shows here...",
     category: value.category,
@@ -518,14 +529,14 @@ function CardForm({
   return (
     <div className="screen">
       <div className="topbar">
-        <button className="icon-btn" onClick={onCancel} aria-label="Cancel">
+        <button className="icon-btn icon-btn--plain" onClick={onCancel} aria-label="Cancel">
           ⬅️
         </button>
         <h2>{draft.id ? "Edit Card" : "New Card"}</h2>
       </div>
 
       <div className="section-title">Preview</div>
-      <GameCard card={preview} playerName="Player Name" />
+      <GameCard card={previewCard} playerName="Player Name" preview />
 
       <div className="field">
         <label htmlFor="desc">Description</label>
@@ -585,7 +596,7 @@ function CardForm({
           <label>Duration</label>
           <ChipSelect
             options={DURATIONS}
-            value={value.duration ?? "Until next turn"}
+            value={value.duration ?? "Next round"}
             onChange={(dur) => set("duration", dur)}
           />
         </div>

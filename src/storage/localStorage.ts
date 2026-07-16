@@ -8,6 +8,7 @@ import {
   type Card,
   type CardLocation,
   type CategoryDef,
+  type Duration,
 } from "../types";
 
 /** Maps old location names to their current equivalents, so libraries
@@ -16,6 +17,14 @@ const LEGACY_LOCATIONS: Record<string, CardLocation> = {
   Home: "At Home",
   Pub: "Pub Trip",
   "Club/Festival": "Night Out",
+};
+
+/** Maps old minute-based durations to their round-based equivalents. */
+const LEGACY_DURATIONS: Record<string, Duration> = {
+  "1 min": "1 round",
+  "2 min": "2 rounds",
+  "5 min": "3 rounds",
+  "Until next turn": "Next round",
 };
 
 const CARDS_KEY = "riskit.cards.v1";
@@ -27,7 +36,7 @@ const META_KEY = "riskit.library.meta.v1";
  * haven't customised their library will pull in the new defaults automatically
  * on the next load; customised libraries are left untouched.
  */
-export const LIBRARY_VERSION = 7;
+export const LIBRARY_VERSION = 8;
 
 interface LibraryMeta {
   version: number;
@@ -184,7 +193,11 @@ function sanitizeCard(value: unknown, validNames: Set<string>): Card | null {
     difficulty: v.difficulty,
     location: rawLocation,
   };
-  if (isOneOf(v.duration, DURATIONS)) card.duration = v.duration;
+  const rawDuration =
+    typeof v.duration === "string" && v.duration in LEGACY_DURATIONS
+      ? LEGACY_DURATIONS[v.duration]
+      : v.duration;
+  if (isOneOf(rawDuration, DURATIONS)) card.duration = rawDuration;
   return card;
 }
 

@@ -6,11 +6,14 @@ export function GameCard({
   card,
   playerName,
   doubled = false,
+  preview = false,
 }: {
   card: Card;
   /** Shown in place of a card title - every card reads as if speaking to them. */
   playerName?: string;
   doubled?: boolean;
+  /** Editor-only: surfaces extra card settings (like location) that don't show in live play. */
+  preview?: boolean;
 }) {
   const category = useCategory(card.category);
   const scoring = isScoringBehavior(category.behavior);
@@ -37,12 +40,13 @@ export function GameCard({
       {playerName && <div className="game-card__title">{playerName}</div>}
       <div className="game-card__desc">{card.description}</div>
 
-      {(scoring || isOngoing) && (
+      {(scoring || isOngoing || preview) && (
         <div className="game-card__badges">
           {scoring && <DifficultyBadge difficulty={card.difficulty} />}
           {isOngoing && (
-            <span className="duration-badge">⏱️ {card.duration ?? "Until next turn"}</span>
+            <span className="duration-badge">⏱️ {card.duration ?? "Next round"}</span>
           )}
+          {preview && <span className="location-badge">📍 {card.location}</span>}
         </div>
       )}
     </div>
