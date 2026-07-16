@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Button } from "../components/ui";
 import { GameCard } from "../components/GameCard";
 import { Leaderboard } from "../components/Leaderboard";
@@ -8,7 +8,7 @@ import {
   type NewGameConfig,
 } from "../game/gameReducer";
 import { cardPoints } from "../game/scoring";
-import { SCORING_TURNS_PER_PLAYER, type Player } from "../types";
+import { LOCATIONS, LOCATION_ICON, type Player } from "../types";
 
 export function GameScreen({
   config,
@@ -20,6 +20,7 @@ export function GameScreen({
   onQuit: () => void;
 }) {
   const [state, dispatch] = useReducer(gameReducer, config, createGame);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
 
   useEffect(() => {
     if (state.finished) onFinish(state.players, state.drinkMode);
@@ -27,7 +28,7 @@ export function GameScreen({
 
   const player = state.players[state.currentPlayerIndex];
   const everyoneDoneAfterThis = state.players.every(
-    (p) => p.scoringTurnsCompleted >= SCORING_TURNS_PER_PLAYER,
+    (p) => p.scoringTurnsCompleted >= state.roundsPerPlayer,
   );
   const doubled = player.doublePointsArmed;
   const stake = state.currentCard ? cardPoints(state.currentCard, doubled) : 0;
@@ -37,23 +38,55 @@ export function GameScreen({
   const isOngoing = currentBehavior === "ongoing";
   const isMini = currentBehavior === "mini";
   const isDuel = currentBehavior === "duel";
+  const durationLabel = state.currentCard?.duration ?? "Until next turn";
 
   const quit = () => {
     if (window.confirm("Quit the game? All scores will be lost.")) onQuit();
+  };
+
+  const changeLocation = (loc: (typeof LOCATIONS)[number]) => {
+    dispatch({ type: "CHANGE_LOCATION", location: loc });
+    setShowLocationPicker(false);
   };
 
   return (
     <div className="screen" style={{ paddingBottom: 0 }}>
       <div className="topbar">
         <button className="icon-btn" onClick={quit} aria-label="Quit game">
-          ←
+          ⬅️
         </button>
         <div className="spacer" />
-        <span className="muted" style={{ fontSize: 11 }}>
-          {config.location}
-          {config.drinkMode ? " · 🍺" : ""}
-        </span>
+        {state.phase === "ready" ? (
+          <button
+            className="loc-switch"
+            onClick={() => setShowLocationPicker((v) => !v)}
+          >
+            {LOCATION_ICON[state.location]} {state.location} ✏️
+          </button>
+        ) : (
+          <span className="muted" style={{ fontSize: 11 }}>
+            {LOCATION_ICON[state.location]} {state.location}
+            {state.drinkMode ? " · 🍺" : ""}
+          </span>
+        )}
       </div>
+
+      {showLocationPicker && state.phase === "ready" && (
+        <div className="chip-row loc-switch-row">
+          {LOCATIONS.map((loc) => (
+            <button
+              key={loc}
+              className={
+                "chip" + (state.location === loc ? " chip--active" : "")
+              }
+              onClick={() => changeLocation(loc)}
+              aria-pressed={state.location === loc}
+            >
+              {LOCATION_ICON[loc]} {loc}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="game-top">
         <div className="turn-banner">
@@ -68,6 +101,14 @@ export function GameScreen({
             <div className="handoff__icon">📲</div>
             <p className="handoff__label">Pass the phone to</p>
             <p className="handoff__name">{player.name}</p>
+            <Button
+              variant="primary"
+              large
+              block
+              onClick={() => dispatch({ type: "REVEAL", roll: Math.random() })}
+            >
+              Reveal Card
+            </Button>
             {!player.doublePointsUsed && (
               <Button
                 variant={player.doublePointsArmed ? "warn" : "outline"}
@@ -77,25 +118,17 @@ export function GameScreen({
                 onClick={() => dispatch({ type: "ARM_DOUBLE" })}
               >
                 {player.doublePointsArmed
-                  ? "⚡ ×2 ARMED - next card doubles!"
-                  : "⚡ ×2 Double Points"}
+                  ? "2️⃣ ×2 ARMED, next card doubles!"
+                  : "2️⃣ ×2 Double Points"}
               </Button>
             )}
             <p className="handoff__hint muted">
               {player.doublePointsArmed
-                ? "Locked in - reveal your card."
+                ? "Locked in. Reveal your card."
                 : player.doublePointsUsed
                   ? " "
-                  : "Gamble your ×2 before revealing - it locks once the card is out."}
+                  : "Gamble before revealing. Locks once the card is out."}
             </p>
-            <Button
-              variant="primary"
-              large
-              block
-              onClick={() => dispatch({ type: "REVEAL", roll: Math.random() })}
-            >
-              Reveal Card
-            </Button>
           </div>
         )}
 
@@ -103,7 +136,7 @@ export function GameScreen({
           <div className="stack">
             <GameCard card={state.pendingInterlude} />
             <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
-              Everyone joins in - no points. Then {player.name}'s card.
+              Everyone joins in, no points. Then {player.name}'s card.
             </p>
             <Button
               variant="secondary"
@@ -119,20 +152,20 @@ export function GameScreen({
           <div className="stack">
             <GameCard card={state.currentCard} playerName={player.name} doubled={doubled} />
             <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
-              Keep it up until your next turn - the group checks then for +{stake}.
+              Keep it up for {durationLabel}. Group checks next turn for +{stake}.
             </p>
             <div className="btn-row">
               <Button
                 variant="warn"
                 onClick={() => dispatch({ type: "START_MISSION" })}
               >
-                ▶ Start Task
+                ▶️ Start Task
               </Button>
               <Button
                 variant="danger"
                 onClick={() => dispatch({ type: "FAIL" })}
               >
-                ✗ Skip · 0
+                ❌ Skip · 0
               </Button>
             </div>
           </div>
@@ -141,8 +174,9 @@ export function GameScreen({
         {state.phase === "card" && state.currentCard && isMini && (
           <div className="stack">
             <GameCard card={state.currentCard} playerName={player.name} doubled={doubled} />
-            <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
-              Everyone plays - then tap who won for +{stake}.
+            <p className="mini-callout">WHO WON?</p>
+            <p className="muted" style={{ textAlign: "center", fontSize: 11 }}>
+              Winner takes +{stake}
             </p>
             <div className="winner-grid">
               {state.players.map((p) => (
@@ -162,7 +196,7 @@ export function GameScreen({
               block
               onClick={() => dispatch({ type: "AWARD_MINI", winnerId: null })}
             >
-              ✗ No winner · 0
+              ❌ No winner · 0
             </Button>
           </div>
         )}
@@ -171,20 +205,20 @@ export function GameScreen({
           <div className="stack">
             <GameCard card={state.currentCard} playerName={player.name} doubled={doubled} />
             <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
-              Only {player.name} can win the points here - if they lose, nobody scores.
+              Only {player.name} can score here. If they lose, nobody does.
             </p>
             <div className="btn-row">
               <Button
                 variant="success"
                 onClick={() => dispatch({ type: "COMPLETE" })}
               >
-                ✓ {player.name} Won +{stake}
+                ✅ {player.name} Won +{stake}
               </Button>
               <Button
                 variant="danger"
                 onClick={() => dispatch({ type: "FAIL" })}
               >
-                ✗ Blocked · 0
+                ❌ Blocked · 0
               </Button>
             </div>
           </div>
@@ -198,13 +232,13 @@ export function GameScreen({
                 variant="success"
                 onClick={() => dispatch({ type: "COMPLETE" })}
               >
-                ✓ Done +{stake}
+                ✅ Complete +{stake}
               </Button>
               <Button
                 variant="danger"
                 onClick={() => dispatch({ type: "FAIL" })}
               >
-                ✗ Fail · 0
+                ❌ Failed · 0
               </Button>
             </div>
           </div>
@@ -218,8 +252,8 @@ export function GameScreen({
             onClick={() => dispatch({ type: "SWAP" })}
           >
             {player.doublePointsArmed
-              ? "🔄 Swap - loses your ⚡×2! · -50"
-              : "🔄 Swap this card · -50"}
+              ? "🔁 Swap, loses your 2️⃣×2! · -50"
+              : "🔁 Swap this card · -50"}
           </Button>
         )}
 
@@ -241,7 +275,7 @@ export function GameScreen({
                   dispatch({ type: "RESOLVE_MISSION", success: true })
                 }
               >
-                ✓ Yes +{player.pendingMission.points}
+                ✅ Yes +{player.pendingMission.points}
               </Button>
               <Button
                 variant="danger"
@@ -249,7 +283,7 @@ export function GameScreen({
                   dispatch({ type: "RESOLVE_MISSION", success: false })
                 }
               >
-                ✗ No · 0
+                ❌ No · 0
               </Button>
             </div>
           </div>
@@ -263,7 +297,7 @@ export function GameScreen({
                   ⏳
                 </div>
                 <div className="award__label">
-                  Task started - checked at your next turn
+                  Task started, checked at your next turn
                 </div>
               </div>
             ) : (
@@ -299,7 +333,11 @@ export function GameScreen({
         )}
       </div>
 
-      <Leaderboard players={state.players} currentPlayerId={player.id} />
+      <Leaderboard
+        players={state.players}
+        currentPlayerId={player.id}
+        roundsPerPlayer={state.roundsPerPlayer}
+      />
     </div>
   );
 }

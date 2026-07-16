@@ -45,8 +45,9 @@ export function ResultsScreen({
                 <div className="result-row__name">{player.name}</div>
                 {drinkMode && (
                   <div className="result-row__drinks">
-                    {"🍺".repeat(drinks.get(player.id) ?? 0) || "No drinks"}
-                    {drinks.get(player.id) ? ` ${drinks.get(player.id)}` : ""}
+                    {drinks.get(player.id)
+                      ? `🍺 x${drinks.get(player.id)}`
+                      : "No drinks"}
                   </div>
                 )}
               </div>
@@ -58,7 +59,7 @@ export function ResultsScreen({
 
       <div className="spacer" />
       <Button variant="primary" large block onClick={onPlayAgain}>
-        ↻ Play Again
+        🔄 Play Again
       </Button>
       <Button variant="secondary" block onClick={onHome}>
         🏠 Home

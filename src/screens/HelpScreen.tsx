@@ -7,7 +7,7 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
     <div className="screen">
       <div className="topbar">
         <button className="icon-btn" onClick={onBack} aria-label="Back">
-          ←
+          ⬅️
         </button>
         <h2>How to Play</h2>
       </div>
@@ -16,8 +16,8 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
         <div className="help-block">
           <div className="help-block__title">🎯 Goal</div>
           <p>
-            Pass one phone around. Everyone gets five scoring cards. Highest
-            score wins.
+            Pass one phone around. Pick 1, 3 or 5 scoring cards per player at
+            setup. Highest score wins.
           </p>
         </div>
 
@@ -25,7 +25,7 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
           <div className="help-block__title">🃏 Each turn</div>
           <p>
             Hand the phone to the named player, reveal their card, then tap
-            <b> Done</b> to bank the points or <b>Fail</b> for zero.
+            <b> Complete</b> to bank the points or <b>Failed</b> for zero.
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
                 <b>
                   {c.icon} {c.name}
                 </b>{" "}
-                - {c.description}
+                : {c.description}
                 <br />
               </span>
             ))}
@@ -52,16 +52,16 @@ export function HelpScreen({ onBack }: { onBack: () => void }) {
         <div className="help-block">
           <div className="help-block__title">🎁 Lifelines (once each)</div>
           <p>
-            <b>×2 Double</b> - arm it before revealing to double the next card.
+            <b>2️⃣ Double</b> : arm it before revealing to double the next card.
             <br />
-            <b>🔄 Swap</b> - ditch a card you don't fancy and draw another.
+            <b>🔁 Swap</b> : ditch a card you don't fancy and draw another, for -50.
           </p>
         </div>
 
         <div className="help-block">
           <div className="help-block__title">🍺 Drink Mode</div>
           <p>
-            Optional. No drinking during play - drinks are handed out at the end
+            Optional. No drinking during play; drinks are handed out at the end
             by finishing place.
           </p>
         </div>

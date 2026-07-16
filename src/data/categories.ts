@@ -23,7 +23,7 @@ export const DEFAULT_CATEGORIES: CategoryDef[] = [
     icon: "🥊",
     color: "var(--red)",
     description:
-      "Face off against another player - only you can win the points. Lose, and nobody scores.",
+      "Face off against another player. Only you can win the points; lose, and nobody scores.",
   },
   {
     name: "Task",
@@ -31,7 +31,7 @@ export const DEFAULT_CATEGORIES: CategoryDef[] = [
     icon: "⏳",
     color: "var(--orange)",
     description:
-      "Keep a task going until your next turn - the group checks then.",
+      "Keep a task going until your next turn, then the group checks.",
   },
   {
     name: "Mini Game",
