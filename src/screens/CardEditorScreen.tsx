@@ -267,11 +267,11 @@ export function CardEditorScreen({
       {activeCategory && <p className="cat-desc">{activeCategory.description}</p>}
 
       <div className="btn-row">
-        <Button variant="ghost" onClick={() => activeCategory && setCatDraft({ ...activeCategory, originalName: activeCategory.name })}>
-          ✎ Edit category
+        <Button variant="outline" onClick={() => activeCategory && setCatDraft({ ...activeCategory, originalName: activeCategory.name })}>
+          ✎ Edit Category
         </Button>
-        <Button variant="ghost" onClick={newCategory}>
-          + New category
+        <Button variant="outline" onClick={newCategory}>
+          + New Category
         </Button>
       </div>
 

@@ -18,11 +18,12 @@ export const DEFAULT_CATEGORIES: CategoryDef[] = [
     description: "Do it right now to bank the points.",
   },
   {
-    name: "Challenge",
-    behavior: "standard",
-    icon: "🎯",
-    color: "var(--yellow)",
-    description: "A quick skill or feat to pull off on the spot.",
+    name: "1v1",
+    behavior: "duel",
+    icon: "🥊",
+    color: "var(--red)",
+    description:
+      "Face off against another player - only you can win the points. Lose, and nobody scores.",
   },
   {
     name: "Task",

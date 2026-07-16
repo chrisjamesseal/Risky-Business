@@ -100,10 +100,10 @@ describe("default library", () => {
     expect(rounds.every((c) => !scores(c.category))).toBe(true);
   });
 
-  it("has Mini Game cards, and they are non-scoring (just for fun)", () => {
+  it("Mini Game is defined as a non-scoring category (may have zero cards)", () => {
     const minis = DEFAULT_CARDS.filter((c) => c.category === "Mini Game");
-    expect(minis.length).toBeGreaterThan(0);
     expect(minis.every((c) => !scores(c.category))).toBe(true);
+    expect(scores("Mini Game")).toBe(false);
   });
 
   it("has Task cards (deferred, checked at the next turn), and they score", () => {
@@ -401,13 +401,6 @@ describe("opponent name token", () => {
   });
 });
 
-describe("Mini Game category (no points, just for fun)", () => {
-  it("the default Mini Game category does not score", () => {
-    const miniCards = DEFAULT_CARDS.filter((c) => c.category === "Mini Game");
-    expect(miniCards.length).toBeGreaterThan(0);
-    expect(miniCards.every((c) => !scores(c.category))).toBe(true);
-  });
-});
 
 describe("the 'mini' winner behaviour (available for custom categories)", () => {
   const winnerCat: CategoryDef = {
@@ -524,5 +517,46 @@ describe("Task cards (Ongoing behaviour, deferred to next turn)", () => {
       expect(p.scoringTurnsCompleted).toBe(SCORING_TURNS_PER_PLAYER);
       expect(p.score).toBe(SCORING_TURNS_PER_PLAYER * 100);
     }
+  });
+});
+
+describe("1v1 cards (duel behaviour - only the reader can score)", () => {
+  const duelCard: Card = {
+    id: "d1",
+    description: "Arm wrestle {opponent}.",
+    category: "1v1",
+    difficulty: "Medium",
+    location: "All",
+  };
+
+  it("has default 1v1 cards, and they are scoring", () => {
+    const duels = DEFAULT_CARDS.filter((c) => c.category === "1v1");
+    expect(duels.length).toBeGreaterThan(0);
+    expect(duels.every((c) => scores(c.category))).toBe(true);
+  });
+
+  it("no longer has a Challenge category - 1v1 replaced it", () => {
+    expect(DEFAULT_CATEGORIES.some((c) => c.name === "Challenge")).toBe(false);
+    expect(DEFAULT_CARDS.some((c) => c.category === "Challenge")).toBe(false);
+  });
+
+  it("awards the reader points on COMPLETE; nobody scores on FAIL", () => {
+    const cfg = gameConfig({ cards: [duelCard], seed: 3 });
+    let state = createGame(cfg);
+    state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+    expect(state.currentCard?.category).toBe("1v1");
+    const expected = cardPoints(state.currentCard!, false);
+    state = gameReducer(state, { type: "COMPLETE" });
+    expect(state.players[0].score).toBe(expected);
+    expect(state.players[1].score).toBe(0); // the opponent never scores
+  });
+
+  it("awards nobody on FAIL - losing doesn't hand points to the opponent", () => {
+    const cfg = gameConfig({ cards: [duelCard], seed: 3 });
+    let state = createGame(cfg);
+    state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+    state = gameReducer(state, { type: "FAIL" });
+    expect(state.players.every((p) => p.score === 0)).toBe(true);
+    expect(state.players[0].scoringTurnsCompleted).toBe(1);
   });
 });

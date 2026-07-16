@@ -36,6 +36,7 @@ export function GameScreen({
     : undefined;
   const isOngoing = currentBehavior === "ongoing";
   const isMini = currentBehavior === "mini";
+  const isDuel = currentBehavior === "duel";
 
   const quit = () => {
     if (window.confirm("Quit the game? All scores will be lost.")) onQuit();
@@ -166,7 +167,30 @@ export function GameScreen({
           </div>
         )}
 
-        {state.phase === "card" && state.currentCard && !isOngoing && !isMini && (
+        {state.phase === "card" && state.currentCard && isDuel && (
+          <div className="stack">
+            <GameCard card={state.currentCard} playerName={player.name} doubled={doubled} />
+            <p className="muted" style={{ textAlign: "center", fontSize: 12 }}>
+              Only {player.name} can win the points here - if they lose, nobody scores.
+            </p>
+            <div className="btn-row">
+              <Button
+                variant="success"
+                onClick={() => dispatch({ type: "COMPLETE" })}
+              >
+                ✓ {player.name} Won +{stake}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => dispatch({ type: "FAIL" })}
+              >
+                ✗ Blocked · 0
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {state.phase === "card" && state.currentCard && !isOngoing && !isMini && !isDuel && (
           <div className="stack">
             <GameCard card={state.currentCard} playerName={player.name} doubled={doubled} />
             <div className="btn-row">

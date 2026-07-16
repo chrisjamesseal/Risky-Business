@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.0.0";
+export const APP_VERSION = "2.1.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "2.1.0",
+    title: "1v1 category & layout fixes",
+    changes: [
+      "New 1v1 category replaces Challenge: face off against another player - only you can win the points, and if you lose nobody scores",
+      "Card editor: Edit Category and New Category are now proper buttons",
+      "Card editor category tabs use a fixed 3-column layout so labels like 'Mini Game' always fit",
+      "Synced the latest card updates and fixed a broken opponent-name token on one card",
+    ],
+  },
   {
     version: "2.0.0",
     title: "Full card refresh",
