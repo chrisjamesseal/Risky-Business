@@ -421,14 +421,16 @@ select:focus {
 }
 
 /* Card editor category tabs - icon plus a short label. */
+/* Fixed 3-column grid so labels like "MINI GAME" always get enough room,
+   wrapping onto extra rows as more categories are added instead of
+   squeezing everything into one cramped line. */
 .cat-tabs {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
 
 .cat-tab {
-  flex: 1 1 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -438,7 +440,7 @@ select:focus {
   color: var(--ink-dim);
   background: var(--panel);
   border: 3px solid var(--border);
-  padding: 8px 2px;
+  padding: 8px 4px;
   cursor: pointer;
   min-width: 0;
 }
@@ -451,6 +453,8 @@ select:focus {
   font-size: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .cat-tab--active {
