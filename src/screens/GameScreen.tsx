@@ -52,7 +52,7 @@ export function GameScreen({
   return (
     <div className="screen" style={{ paddingBottom: 0 }}>
       <div className="topbar">
-        <button className="icon-btn" onClick={quit} aria-label="Quit game">
+        <button className="icon-btn icon-btn--plain" onClick={quit} aria-label="Quit game">
           ⬅️
         </button>
         <div className="spacer" />

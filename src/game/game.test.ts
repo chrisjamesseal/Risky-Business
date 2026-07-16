@@ -103,6 +103,22 @@ describe("locations", () => {
       "Night Out",
     ]);
   });
+
+  it("migrates legacy minute-based durations to round-based ones", () => {
+    const legacy = [
+      { id: "a", description: "d1", category: "Task", difficulty: "Easy", location: "All", duration: "1 min" },
+      { id: "b", description: "d2", category: "Task", difficulty: "Easy", location: "All", duration: "2 min" },
+      { id: "c", description: "d3", category: "Task", difficulty: "Easy", location: "All", duration: "5 min" },
+      { id: "d", description: "d4", category: "Task", difficulty: "Easy", location: "All", duration: "Until next turn" },
+    ];
+    const sanitized = sanitizeCards(legacy, new Set(["Task"]));
+    expect(sanitized?.map((c) => c.duration)).toEqual([
+      "1 round",
+      "2 rounds",
+      "3 rounds",
+      "Next round",
+    ]);
+  });
 });
 
 describe("difficulty tiers", () => {
@@ -391,7 +407,7 @@ describe("game reducer", () => {
   it("defaults to 5 rounds per player, and honours a chosen option", () => {
     const defaultState = createGame(config);
     expect(defaultState.roundsPerPlayer).toBe(5);
-    expect(ROUND_OPTIONS).toEqual([1, 3, 5]);
+    expect(ROUND_OPTIONS).toEqual([3, 5, 10]);
 
     const short = createGame(gameConfig({ seed: 5, roundsPerPlayer: 1 }));
     expect(short.roundsPerPlayer).toBe(1);

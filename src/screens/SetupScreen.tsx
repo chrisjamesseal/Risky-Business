@@ -1,11 +1,9 @@
 import { useMemo, useState } from "react";
 import {
+  AVG_MINUTES_PER_CARD,
   DIFFICULTIES,
-  DIFFICULTY_POINTS,
   LOCATIONS,
   LOCATION_ICON,
-  MINUTES_PER_CARD_MAX,
-  MINUTES_PER_CARD_MIN,
   ROUND_OPTIONS,
   type Card,
   type CategoryDef,
@@ -76,9 +74,7 @@ export function SetupScreen({
 
   const timeEstimate = (roundsOption: number) => {
     const totalCards = roundsOption * names.length;
-    const min = totalCards * MINUTES_PER_CARD_MIN;
-    const max = totalCards * MINUTES_PER_CARD_MAX;
-    return `~${min}-${max} min`;
+    return `~${totalCards * AVG_MINUTES_PER_CARD} min`;
   };
 
   const start = () => {
@@ -111,7 +107,7 @@ export function SetupScreen({
   return (
     <div className="screen">
       <div className="topbar">
-        <button className="icon-btn" onClick={onBack} aria-label="Back">
+        <button className="icon-btn icon-btn--plain" onClick={onBack} aria-label="Back">
           ⬅️
         </button>
         <h2>New Game</h2>
@@ -203,7 +199,7 @@ export function SetupScreen({
               onClick={() => toggleDifficulty(d)}
               aria-pressed={difficulties.includes(d)}
             >
-              {d} · {DIFFICULTY_POINTS[d]}
+              {d}
             </button>
           ))}
         </div>

@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.2.0";
+export const APP_VERSION = "2.3.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "2.3.0",
+    title: "Longer games & editor tweaks",
+    changes: [
+      "Rounds options are now 3, 5 or 10 per player (default 5), each with an average time estimate",
+      "Task durations are now round-based (1, 2, 3 rounds, or Next round) instead of minutes",
+      "Difficulty picker in setup is now just Easy/Medium/Hard, no clutter",
+      "Back and cancel buttons no longer sit in a boxed background",
+      "Card Editor search has a clear button to reset back to the category view",
+      "The Card Editor's card preview now shows location (and duration, for Task cards) so you can see every custom setting while editing",
+    ],
+  },
   {
     version: "2.2.0",
     title: "Rounds, locations & polish",

@@ -31,12 +31,12 @@ export const DEFAULT_CARDS: Card[] = [
   t("truth-17", "Answer a brutal would you rather question from the group.", "Medium", "All"),
 
   // -------------------------------------------------------------- Tasks
-  k("task-01", "Speak in a fake accent until your next turn.", "Medium", "All", "Until next turn"),
-  k("task-02", "Freeze like a statue until your next round. Your mouth can still move though.", "Hard", "All", "Until next turn"),
-  k("task-03", "Speak like Donald Trump until your next turn.", "Medium", "All", "Until next turn"),
-  k("task-04", "Wink at a player without anyone else noticing.", "Hard", "All", "Until next turn"),
-  k("task-05", "You are now mute until your next turn.", "Hard", "All", "Until next turn"),
-  k("task-06", "Talk without showing your teeth for one minute.", "Hard", "All", "1 min"),
+  k("task-01", "Speak in a fake accent until your next turn.", "Medium", "All", "Next round"),
+  k("task-02", "Freeze like a statue until your next round. Your mouth can still move though.", "Hard", "All", "Next round"),
+  k("task-03", "Speak like Donald Trump until your next turn.", "Medium", "All", "Next round"),
+  k("task-04", "Wink at a player without anyone else noticing.", "Hard", "All", "Next round"),
+  k("task-05", "You are now mute until your next turn.", "Hard", "All", "Next round"),
+  k("task-06", "Talk without showing your teeth for a full round.", "Hard", "All", "1 round"),
 
   // -------------------------------------------------------------- Dares
   d("dare-01", "Give every player a unique compliment.", "Easy", "All"),
