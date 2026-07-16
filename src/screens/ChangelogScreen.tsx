@@ -6,7 +6,7 @@ export function ChangelogScreen({ onBack }: { onBack: () => void }) {
     <div className="screen">
       <div className="topbar">
         <button className="icon-btn" onClick={onBack} aria-label="Back">
-          ←
+          ⬅️
         </button>
         <h2>What's New</h2>
       </div>

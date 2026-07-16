@@ -1135,3 +1135,65 @@ select:focus {
     animation: none !important;
   }
 }
+
+/* --------------------------------------------------------- Card search */
+
+.search-input {
+  margin-bottom: 2px;
+}
+
+.editor-item__cat {
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------- In-game location switch */
+
+.loc-switch {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--ink-dim);
+  background: none;
+  border: none;
+  padding: 4px 2px;
+  cursor: pointer;
+}
+
+.loc-switch-row {
+  margin-top: -8px;
+}
+
+/* ------------------------------------------------------- Mini Game prompt */
+
+.mini-callout {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--yellow);
+  text-shadow: 2px 2px 0 var(--border);
+  margin: 0;
+}
+
+/* ----------------------------------------------------------- Card badges */
+
+.game-card__badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.duration-badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 3px solid var(--orange);
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

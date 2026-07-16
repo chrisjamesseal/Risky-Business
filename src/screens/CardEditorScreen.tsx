@@ -5,6 +5,7 @@ import {
   CATEGORY_BEHAVIORS,
   CATEGORY_COLORS,
   DIFFICULTIES,
+  DURATIONS,
   isScoringBehavior,
   type Card,
   type CategoryBehavior,
@@ -69,6 +70,7 @@ export function CardEditorScreen({
   const [filterName, setFilterName] = useState(categories[0]?.name ?? "");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [catDraft, setCatDraft] = useState<CatDraft | null>(null);
+  const [search, setSearch] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
 
   // Keep the active tab valid if categories change underneath us.
@@ -78,10 +80,14 @@ export function CardEditorScreen({
     "";
   const activeCategory = categories.find((c) => c.name === filter);
 
-  const visible = useMemo(
-    () => cards.filter((c) => c.category === filter),
-    [cards, filter],
-  );
+  const searching = search.trim().length > 0;
+  const visible = useMemo(() => {
+    if (searching) {
+      const term = search.trim().toLowerCase();
+      return cards.filter((c) => c.description.toLowerCase().includes(term));
+    }
+    return cards.filter((c) => c.category === filter);
+  }, [cards, filter, search, searching]);
 
   const upsert = (value: Draft) => {
     if (!value.description.trim()) {
@@ -245,80 +251,107 @@ export function CardEditorScreen({
     <div className="screen">
       <div className="topbar">
         <button className="icon-btn" onClick={onBack} aria-label="Back">
-          ←
+          ⬅️
         </button>
         <h2>Card Editor</h2>
       </div>
 
-      <div className="cat-tabs">
-        {categories.map((cat) => (
-          <button
-            key={cat.name}
-            className={"cat-tab" + (filter === cat.name ? " cat-tab--active" : "")}
-            onClick={() => setFilterName(cat.name)}
-            aria-pressed={filter === cat.name}
-          >
-            <span className="cat-tab__icon">{cat.icon}</span>
-            <span className="cat-tab__label">{cat.name}</span>
-          </button>
-        ))}
-      </div>
+      <input
+        type="text"
+        className="search-input"
+        placeholder="🔍 Search all cards..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-      {activeCategory && <p className="cat-desc">{activeCategory.description}</p>}
+      {!searching && (
+        <>
+          <div className="cat-tabs">
+            {categories.map((cat) => (
+              <button
+                key={cat.name}
+                className={"cat-tab" + (filter === cat.name ? " cat-tab--active" : "")}
+                onClick={() => setFilterName(cat.name)}
+                aria-pressed={filter === cat.name}
+              >
+                <span className="cat-tab__icon">{cat.icon}</span>
+                <span className="cat-tab__label">{cat.name}</span>
+              </button>
+            ))}
+          </div>
 
-      <div className="btn-row">
-        <Button variant="outline" onClick={() => activeCategory && setCatDraft({ ...activeCategory, originalName: activeCategory.name })}>
-          ✎ Edit Category
-        </Button>
-        <Button variant="outline" onClick={newCategory}>
-          + New Category
-        </Button>
-      </div>
+          {activeCategory && <p className="cat-desc">{activeCategory.description}</p>}
 
-      <Button variant="primary" block onClick={() => setDraft(blankDraft(filter))}>
-        + Add {filter} card
-      </Button>
+          <div className="btn-row">
+            <Button variant="outline" onClick={() => activeCategory && setCatDraft({ ...activeCategory, originalName: activeCategory.name })}>
+              ✏️ Edit Category
+            </Button>
+            <Button variant="outline" onClick={newCategory}>
+              ➕ New Category
+            </Button>
+          </div>
+
+          <Button variant="primary" block onClick={() => setDraft(blankDraft(filter))}>
+            ➕ Add {filter} card
+          </Button>
+        </>
+      )}
 
       <div className="stack--sm">
-        {visible.length === 0 && <p className="muted">No {filter} cards yet.</p>}
-        {visible.map((card) => (
-          <button
-            key={card.id}
-            className="editor-item__main"
-            onClick={() => setDraft(card)}
-          >
-            <span className="editor-item__body">
-              <span className="editor-item__titlerow">
-                <span className="editor-item__desc editor-item__desc--main">
-                  {card.description}
+        {searching && (
+          <p className="muted" style={{ fontSize: 11 }}>
+            {visible.length} result{visible.length === 1 ? "" : "s"} across all categories
+          </p>
+        )}
+        {visible.length === 0 && (
+          <p className="muted">{searching ? "No cards match your search." : `No ${filter} cards yet.`}</p>
+        )}
+        {visible.map((card) => {
+          const cardCategory = categories.find((c) => c.name === card.category);
+          return (
+            <button
+              key={card.id}
+              className="editor-item__main"
+              onClick={() => setDraft(card)}
+            >
+              <span className="editor-item__body">
+                <span className="editor-item__titlerow">
+                  <span className="editor-item__desc editor-item__desc--main">
+                    {card.description}
+                  </span>
+                  <span className="editor-item__edit">✏️ Edit</span>
                 </span>
-                <span className="editor-item__edit">✎ Edit</span>
+                <span className="editor-item__meta">
+                  {searching && cardCategory && (
+                    <span className="editor-item__cat">
+                      {cardCategory.icon} {cardCategory.name}
+                    </span>
+                  )}
+                  {cardCategory && isScoringBehavior(cardCategory.behavior) ? (
+                    <DifficultyBadge difficulty={card.difficulty} />
+                  ) : (
+                    <span className="editor-item__nopts">No points</span>
+                  )}
+                  <span className="editor-item__loc">{card.location}</span>
+                </span>
               </span>
-              <span className="editor-item__meta">
-                {activeCategory && isScoringBehavior(activeCategory.behavior) ? (
-                  <DifficultyBadge difficulty={card.difficulty} />
-                ) : (
-                  <span className="editor-item__nopts">No points</span>
-                )}
-                <span className="editor-item__loc">{card.location}</span>
-              </span>
-            </span>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       <div className="spacer" />
       <div className="section-title">Backup</div>
       <div className="btn-row">
         <Button variant="secondary" onClick={exportCards}>
-          ⇩ Export
+          ⬇️ Export
         </Button>
         <Button variant="secondary" onClick={() => fileInput.current?.click()}>
-          ⇧ Import
+          ⬆️ Import
         </Button>
       </div>
       <Button variant="danger" block onClick={onReset}>
-        ↺ Reset to Default
+        ♻️ Reset to Default
       </Button>
       <input
         ref={fileInput}
@@ -360,7 +393,7 @@ function CategoryForm({
     <div className="screen">
       <div className="topbar">
         <button className="icon-btn" onClick={onCancel} aria-label="Cancel">
-          ←
+          ⬅️
         </button>
         <h2>{draft.originalName ? "Edit Category" : "New Category"}</h2>
       </div>
@@ -417,7 +450,7 @@ function CategoryForm({
 
       {onDelete && (
         <Button variant="danger" onClick={onDelete}>
-          🗑 Delete category &amp; its cards
+          🗑️ Delete category &amp; its cards
         </Button>
       )}
 
@@ -473,6 +506,7 @@ function CardForm({
     category: value.category,
     difficulty: value.difficulty,
     location: value.location,
+    duration: value.duration,
   };
 
   const confirmDelete = () => {
@@ -485,7 +519,7 @@ function CardForm({
     <div className="screen">
       <div className="topbar">
         <button className="icon-btn" onClick={onCancel} aria-label="Cancel">
-          ←
+          ⬅️
         </button>
         <h2>{draft.id ? "Edit Card" : "New Card"}</h2>
       </div>
@@ -546,6 +580,17 @@ function CardForm({
         </p>
       )}
 
+      {behavior === "ongoing" && (
+        <div className="field">
+          <label>Duration</label>
+          <ChipSelect
+            options={DURATIONS}
+            value={value.duration ?? "Until next turn"}
+            onChange={(dur) => set("duration", dur)}
+          />
+        </div>
+      )}
+
       <div className="field">
         <label>Location</label>
         <ChipSelect
@@ -557,7 +602,7 @@ function CardForm({
 
       {onDelete && (
         <Button variant="danger" onClick={confirmDelete}>
-          🗑 Delete
+          🗑️ Delete
         </Button>
       )}
 

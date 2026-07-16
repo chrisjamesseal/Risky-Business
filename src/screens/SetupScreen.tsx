@@ -3,6 +3,10 @@ import {
   DIFFICULTIES,
   DIFFICULTY_POINTS,
   LOCATIONS,
+  LOCATION_ICON,
+  MINUTES_PER_CARD_MAX,
+  MINUTES_PER_CARD_MIN,
+  ROUND_OPTIONS,
   type Card,
   type CategoryDef,
   type Difficulty,
@@ -13,12 +17,6 @@ import { scoringCardsFor } from "../game/deckBuilder";
 
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 8;
-
-const LOCATION_ICON: Record<GameLocation, string> = {
-  Home: "🏠",
-  Pub: "🍺",
-  "Club/Festival": "🎵",
-};
 
 const DRINK_LADDER: { place: string; drinks: number }[] = [
   { place: "🥇 1st", drinks: 0 },
@@ -40,15 +38,17 @@ export function SetupScreen({
     location: GameLocation;
     drinkMode: boolean;
     difficulties: Difficulty[];
+    roundsPerPlayer: number;
   }) => void;
   onBack: () => void;
 }) {
   const [names, setNames] = useState<string[]>(["", ""]);
-  const [location, setLocation] = useState<GameLocation>("Home");
+  const [location, setLocation] = useState<GameLocation>("At Home");
   const [drinkMode, setDrinkMode] = useState(false);
   const [difficulties, setDifficulties] = useState<Difficulty[]>([
     ...DIFFICULTIES,
   ]);
+  const [rounds, setRounds] = useState<number>(5);
   const [error, setError] = useState<string | null>(null);
 
   const setName = (index: number, value: string) => {
@@ -74,6 +74,13 @@ export function SetupScreen({
     [cards, location, difficulties, categories],
   );
 
+  const timeEstimate = (roundsOption: number) => {
+    const totalCards = roundsOption * names.length;
+    const min = totalCards * MINUTES_PER_CARD_MIN;
+    const max = totalCards * MINUTES_PER_CARD_MAX;
+    return `~${min}-${max} min`;
+  };
+
   const start = () => {
     const trimmed = names.map((n) => n.trim());
     const filled = trimmed.filter((n) => n.length > 0);
@@ -92,14 +99,20 @@ export function SetupScreen({
     const finalNames = trimmed.map((n, i) => n || `Player ${i + 1}`);
     // Keep difficulties in their natural Easy-to-Hard order for the deck.
     const ordered = DIFFICULTIES.filter((d) => difficulties.includes(d));
-    onStart({ names: finalNames, location, drinkMode, difficulties: ordered });
+    onStart({
+      names: finalNames,
+      location,
+      drinkMode,
+      difficulties: ordered,
+      roundsPerPlayer: rounds,
+    });
   };
 
   return (
     <div className="screen">
       <div className="topbar">
         <button className="icon-btn" onClick={onBack} aria-label="Back">
-          ←
+          ⬅️
         </button>
         <h2>New Game</h2>
       </div>
@@ -122,7 +135,7 @@ export function SetupScreen({
               disabled={names.length <= MIN_PLAYERS}
               aria-label="Remove player"
             >
-              ✕
+              ❌
             </button>
           </div>
         ))}
@@ -131,7 +144,7 @@ export function SetupScreen({
           onClick={addPlayer}
           disabled={names.length >= MAX_PLAYERS}
         >
-          + Add player ({names.length}/{MAX_PLAYERS})
+          ➕ Add player ({names.length}/{MAX_PLAYERS})
         </Button>
       </div>
 
@@ -149,6 +162,25 @@ export function SetupScreen({
             >
               <span className="loc-option__icon">{LOCATION_ICON[loc]}</span>
               <span className="loc-option__name">{loc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="stack--sm">
+        <div className="section-title">Rounds</div>
+        <p className="muted" style={{ fontSize: 11 }}>
+          Scoring cards per player.
+        </p>
+        <div className="chip-row">
+          {ROUND_OPTIONS.map((r) => (
+            <button
+              key={r}
+              className={"chip" + (rounds === r ? " chip--active" : "")}
+              onClick={() => setRounds(r)}
+              aria-pressed={rounds === r}
+            >
+              {r} · {timeEstimate(r)}
             </button>
           ))}
         </div>
@@ -181,13 +213,13 @@ export function SetupScreen({
       </div>
 
       <div className="stack--sm">
-        <div className="section-title">Drink Mode</div>
+        <div className="section-title">🍺 Drink Mode</div>
         <button
           className="toggle"
           onClick={() => setDrinkMode((v) => !v)}
           aria-pressed={drinkMode}
         >
-          <span>🍺&nbsp; Drink Mode</span>
+          <span>Drinks by finishing place</span>
           <span
             className={`toggle__state toggle__state--${drinkMode ? "on" : "off"}`}
           >
@@ -196,15 +228,15 @@ export function SetupScreen({
         </button>
         <div className="panel drink-info">
           <p>
-            No drinking during the game - it only affects the end. When the final
-            scores are in, players get drinks based on where they finished:
+            No drinking during the game, it only affects the end. Once scores
+            are final, players get drinks based on where they finished:
           </p>
           <div className="drink-ladder">
             {DRINK_LADDER.map((row) => (
               <div key={row.place} className="drink-ladder__row">
                 <span>{row.place}</span>
                 <span className="drink-ladder__drinks">
-                  {row.drinks === 0 ? "no drinks" : `${"🍺".repeat(row.drinks)} ${row.drinks}`}
+                  {row.drinks === 0 ? "no drinks" : `🍺 x${row.drinks}`}
                 </span>
               </div>
             ))}
@@ -221,7 +253,7 @@ export function SetupScreen({
 
       <div className="spacer" />
       <Button variant="primary" large block onClick={start}>
-        ▶ Start Game
+        ▶️ Start Game
       </Button>
     </div>
   );

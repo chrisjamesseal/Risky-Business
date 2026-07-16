@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.1.0";
+export const APP_VERSION = "2.2.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -9,10 +9,30 @@ export interface ChangelogEntry {
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.2.0",
+    title: "Rounds, locations & polish",
+    changes: [
+      "Pick 1, 3 or 5 scoring cards per player at setup, with a rough time estimate for each",
+      "Change location mid game (e.g. you head home) without losing scores",
+      "Renamed locations: Home is now At Home, Pub is Pub Trip, Club/Festival is Night Out, each with its own emoji",
+      "Task cards now have a duration so you know how long to keep it up",
+      "Fixed {opponent} not resolving to a real player's name in some cases",
+      "Search cards by text in the Card Editor across every category",
+      "Swapped icons for genuine emoji throughout: 2️⃣ for Double Points, 🔁 for Swap",
+      "Leaderboard now shows x1 or x0 next to each power-up",
+      "Reveal Card now sits above Double Points so it's the clear next step",
+      "Renamed Done to Complete and Fail to Failed, both shown in colour",
+      "Fixed Drink Mode showing its own name twice in setup; drinks now show as a x2 style count",
+      "The browser back button now steps back one screen instead of leaving the app",
+      "Mini Game's winner prompt is now a bold WHO WON? instead of small print",
+      "Removed remaining long dashes and tightened up copy across the app",
+    ],
+  },
+  {
     version: "2.1.0",
     title: "1v1 category & layout fixes",
     changes: [
-      "New 1v1 category replaces Challenge: face off against another player - only you can win the points, and if you lose nobody scores",
+      "New 1v1 category replaces Challenge: face off against another player, only you can win the points, and if you lose nobody scores",
       "Card editor: Edit Category and New Category are now proper buttons",
       "Card editor category tabs use a fixed 3-column layout so labels like 'Mini Game' always fit",
       "Synced the latest card updates and fixed a broken opponent-name token on one card",
@@ -23,14 +43,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     title: "Full card refresh",
     changes: [
       "Brand new card set with updated wording throughout",
-      "Cards no longer have a title - your name shows on the card instead, so every card reads like it's talking to you",
+      "Cards no longer have a title, your name shows on the card instead, so every card reads like it's talking to you",
       "Difficulty is now fully random each game instead of ramping up, so you can't save your ×2 for a guaranteed big card",
-      "Removed the Extreme difficulty - those cards moved to Hard",
+      "Removed the Extreme difficulty; those cards moved to Hard",
       "Difficulty pickers are now colour-coded across the whole button (green Easy, cyan Medium, yellow Hard)",
       "Mini Game is now a no-points, just-for-fun category (like Group); the old winner-picking mechanic is still available for custom categories",
       "Renamed Ongoing to Task and Group Round to Group",
       "Some challenge cards can name a random other player automatically",
-      "Swapping a card now cancels an armed ×2 - the button warns you before you tap it",
+      "Swapping a card now cancels an armed ×2; the button warns you before you tap it",
       "Added a power-up icon to ×2 Double Points",
     ],
   },
@@ -77,7 +97,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     changes: [
       "Pick which difficulties to include in a game at setup (just Easy, just Hard, or any mix) instead of enabling cards one by one",
       "Card editor uses tappable chips instead of dropdowns; removed the Duplicate action",
-      "Card Editor and How to Play now live on the home screen - the Settings menu is gone",
+      "Card Editor and How to Play now live on the home screen; the Settings menu is gone",
       "Drink Mode is set in game setup (off by default) with a clear explanation of the end-of-game drinks",
     ],
   },
@@ -86,7 +106,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     title: "Ongoing tasks & tidy-up",
     changes: [
       "New Ongoing category: start a task (e.g. keep an accent), then the group checks 'did you keep it up?' at your next turn and you score",
-      "Removed Chaos Events - they relied on effects the game doesn't handle yet",
+      "Removed Chaos Events; they relied on effects the game doesn't handle yet",
       "Every category now has a short description in the editor and How to Play",
       "Editor list is cleaner: card emoji removed to make room for the text",
     ],
@@ -95,7 +115,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.4.0",
     title: "Double points fixes",
     changes: [
-      "The 'Double Trouble' chaos card now really doubles that turn's card - it was only flavour text before",
+      "The 'Double Trouble' chaos card now really doubles that turn's card; it was only flavour text before",
       "Made the ×2 lifeline clearer: it's a pre-reveal gamble that locks once the card is out",
       "Card editor list now shows each card's full description without opening it",
     ],
@@ -111,7 +131,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.3.0",
     title: "Group Rounds",
     changes: [
-      "New Group Round category - whole-group games and questions that award no points, so cards like Never Have I Ever and Would You Rather aren't forced into pass/fail",
+      "New Group Round category: whole-group games and questions that award no points, so cards like Never Have I Ever and Would You Rather aren't forced into pass/fail",
       "Moved the group-only games out of Mini Games and added new question rounds (Hot Seat, Most Likely To, This or That, Group Vote)",
       "Group Rounds and Chaos Events now appear between turns as no-points interludes",
     ],
@@ -120,7 +140,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "1.2.0",
     title: "Balance & Editor",
     changes: [
-      "Fairer points - truths now cap at Medium, so the biggest scores come from dares, challenges and mini games",
+      "Fairer points: truths now cap at Medium, so the biggest scores come from dares, challenges and mini games",
       "Added higher-difficulty dares, challenges and mini games for every location",
       "Card editor redesigned with a live, in-game style card preview",
       "Tap the version number to see this changelog",

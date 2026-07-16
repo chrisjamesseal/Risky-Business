@@ -20,11 +20,13 @@ import {
   DIFFICULTIES,
   isScoringBehavior,
   LOCATIONS,
+  ROUND_OPTIONS,
   SCORING_TURNS_PER_PLAYER,
   type Card,
   type CategoryDef,
   type Player,
 } from "../types";
+import { sanitizeCards } from "../storage/localStorage";
 
 const BEHAVIOR = behaviorByCategory(DEFAULT_CATEGORIES);
 const scores = (category: string) =>
@@ -34,7 +36,7 @@ const scores = (category: string) =>
 function gameConfig(overrides: Partial<NewGameConfig>): NewGameConfig {
   return {
     names: ["A", "B"],
-    location: "Home",
+    location: "At Home",
     drinkMode: false,
     difficulties: [...DIFFICULTIES],
     cards: DEFAULT_CARDS,
@@ -59,27 +61,47 @@ function player(overrides: Partial<Player> = {}): Player {
 
 describe("location filtering", () => {
   it("matches exact location or All", () => {
-    expect(isUsableInLocation("All", "Pub")).toBe(true);
-    expect(isUsableInLocation("Pub", "Pub")).toBe(true);
-    expect(isUsableInLocation("Home", "Pub")).toBe(false);
+    expect(isUsableInLocation("All", "Pub Trip")).toBe(true);
+    expect(isUsableInLocation("Pub Trip", "Pub Trip")).toBe(true);
+    expect(isUsableInLocation("At Home", "Pub Trip")).toBe(false);
   });
 
   it("only includes cards for the location (or All)", () => {
     const cards: Card[] = [
-      { ...DEFAULT_CARDS[0], location: "Home" },
-      { ...DEFAULT_CARDS[1], location: "Pub" },
+      { ...DEFAULT_CARDS[0], location: "At Home" },
+      { ...DEFAULT_CARDS[1], location: "Pub Trip" },
     ];
-    const usable = cardsForLocation(cards, "Home");
+    const usable = cardsForLocation(cards, "At Home");
     expect(usable.length).toBe(1);
-    expect(usable[0].location).toBe("Home");
+    expect(usable[0].location).toBe("At Home");
   });
 
   it("filters scoring cards by the chosen difficulties", () => {
-    const easyOnly = scoringCardsFor(DEFAULT_CARDS, "Home", ["Easy"], DEFAULT_CATEGORIES);
+    const easyOnly = scoringCardsFor(DEFAULT_CARDS, "At Home", ["Easy"], DEFAULT_CATEGORIES);
     expect(easyOnly.length).toBeGreaterThan(0);
     expect(easyOnly.every((c) => c.difficulty === "Easy")).toBe(true);
-    const hardOnly = scoringCardsFor(DEFAULT_CARDS, "Home", ["Hard"], DEFAULT_CATEGORIES);
+    const hardOnly = scoringCardsFor(DEFAULT_CARDS, "At Home", ["Hard"], DEFAULT_CATEGORIES);
     expect(hardOnly.every((c) => c.difficulty === "Hard")).toBe(true);
+  });
+});
+
+describe("locations", () => {
+  it("uses the renamed location set", () => {
+    expect(LOCATIONS).toEqual(["At Home", "Pub Trip", "Night Out"]);
+  });
+
+  it("migrates legacy location names when sanitising stored cards", () => {
+    const legacy = [
+      { id: "a", description: "d1", category: "Truth", difficulty: "Easy", location: "Home" },
+      { id: "b", description: "d2", category: "Truth", difficulty: "Easy", location: "Pub" },
+      { id: "c", description: "d3", category: "Truth", difficulty: "Easy", location: "Club/Festival" },
+    ];
+    const sanitized = sanitizeCards(legacy, new Set(["Truth"]));
+    expect(sanitized?.map((c) => c.location)).toEqual([
+      "At Home",
+      "Pub Trip",
+      "Night Out",
+    ]);
   });
 });
 
@@ -147,13 +169,13 @@ describe("deck builds for every player count and location", () => {
 
 describe("buildDeck", () => {
   it("returns exactly the requested number of scoring cards plus buffer", () => {
-    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 40, 8, 123);
+    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "At Home", 40, 8, 123);
     expect(deck.scoring.length).toBe(48);
     expect(deck.scoring.every((c) => scores(c.category))).toBe(true);
   });
 
   it("puts Group and Mini Game cards in the interlude pool, not the scoring deck", () => {
-    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 20, 0, 3);
+    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "At Home", 20, 0, 3);
     expect(
       deck.interludes.every((c) => c.category === "Group" || c.category === "Mini Game"),
     ).toBe(true);
@@ -164,9 +186,9 @@ describe("buildDeck", () => {
   });
 
   it("only includes location-appropriate cards", () => {
-    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Pub", 20, 0, 7);
+    const deck = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Pub Trip", 20, 0, 7);
     for (const card of [...deck.scoring, ...deck.interludes]) {
-      expect(["Pub", "All"]).toContain(card.location);
+      expect(["Pub Trip", "All"]).toContain(card.location);
     }
   });
 
@@ -184,14 +206,14 @@ describe("buildDeck", () => {
     // Across several seeds, a Hard card should turn up first at least once -
     // a rising-difficulty curve would never allow that.
     const firstIsHard = Array.from({ length: 20 }, (_, seed) =>
-      buildDeck(pool, cats, "Home", 4, 0, seed).scoring[0].difficulty,
+      buildDeck(pool, cats, "At Home", 4, 0, seed).scoring[0].difficulty,
     ).some((d) => d === "Hard");
     expect(firstIsHard).toBe(true);
   });
 
   it("is deterministic for a given seed", () => {
-    const a = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 20, 4, 42);
-    const b = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "Home", 20, 4, 42);
+    const a = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "At Home", 20, 4, 42);
+    const b = buildDeck(DEFAULT_CARDS, DEFAULT_CATEGORIES, "At Home", 20, 4, 42);
     expect(a.scoring.map((c) => c.id)).toEqual(b.scoring.map((c) => c.id));
   });
 
@@ -204,7 +226,7 @@ describe("buildDeck", () => {
       { id: "q1", description: "d", category: "Q", difficulty: "Easy", location: "All" },
       { id: "f1", description: "d", category: "Fun", difficulty: "Easy", location: "All" },
     ];
-    const deck = buildDeck(cards, cats, "Home", 4, 0, 1);
+    const deck = buildDeck(cards, cats, "At Home", 4, 0, 1);
     expect(deck.scoring.every((c) => c.category === "Q")).toBe(true);
     expect(deck.interludes.every((c) => c.category === "Fun")).toBe(true);
     expect(deck.interludes.length).toBe(1);
@@ -365,6 +387,53 @@ describe("game reducer", () => {
       expect(p.scoringTurnsCompleted).toBe(SCORING_TURNS_PER_PLAYER);
     }
   });
+
+  it("defaults to 5 rounds per player, and honours a chosen option", () => {
+    const defaultState = createGame(config);
+    expect(defaultState.roundsPerPlayer).toBe(5);
+    expect(ROUND_OPTIONS).toEqual([1, 3, 5]);
+
+    const short = createGame(gameConfig({ seed: 5, roundsPerPlayer: 1 }));
+    expect(short.roundsPerPlayer).toBe(1);
+    let state: GameState = short;
+    let guard = 0;
+    while (!state.finished && guard++ < 200) {
+      if (state.phase === "ready") {
+        state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+      } else if (state.phase === "card") {
+        state = gameReducer(state, { type: "COMPLETE" });
+      } else if (state.phase === "result") {
+        state = gameReducer(state, { type: "NEXT" });
+      }
+    }
+    expect(state.finished).toBe(true);
+    for (const p of state.players) {
+      expect(p.scoringTurnsCompleted).toBe(1);
+    }
+  });
+
+  it("changing location mid-game rebuilds the queues without touching scores", () => {
+    let state = createGame(config);
+    state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+    state = gameReducer(state, { type: "COMPLETE" });
+    const scoreBefore = state.players[0].score;
+    state = gameReducer(state, { type: "NEXT" }); // back to phase "ready" for player B
+
+    state = gameReducer(state, { type: "CHANGE_LOCATION", location: "Night Out" });
+    expect(state.location).toBe("Night Out");
+    expect(state.players[0].score).toBe(scoreBefore); // untouched
+
+    state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+    expect(["Night Out", "All"]).toContain(state.currentCard!.location);
+  });
+
+  it("ignores CHANGE_LOCATION mid-card (only allowed between turns)", () => {
+    let state = createGame(config);
+    state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+    expect(state.phase).toBe("card");
+    const next = gameReducer(state, { type: "CHANGE_LOCATION", location: "Night Out" });
+    expect(next.location).toBe(state.location); // unchanged
+  });
 });
 
 describe("opponent name token", () => {
@@ -398,6 +467,21 @@ describe("opponent name token", () => {
       { type: "REVEAL", roll: 0.9 },
     );
     expect(state.currentCard!.description).toBe("Do a dance.");
+  });
+
+  it("resolves the token regardless of case or stray whitespace", () => {
+    const messyCard: Card = {
+      ...tokenCard,
+      id: "messy",
+      description: "Arm wrestle {Opponent} and { opponent }.",
+    };
+    const state = gameReducer(
+      createGame(gameConfig({ cards: [messyCard], seed: 9 })),
+      { type: "REVEAL", roll: 0.9 },
+    );
+    const desc = state.currentCard!.description;
+    expect(desc).not.toMatch(/\{\s*opponent\s*\}/i);
+    expect(desc).not.toContain("Ann");
   });
 });
 

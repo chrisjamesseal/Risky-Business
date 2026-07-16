@@ -37,9 +37,12 @@ export function GameCard({
       {playerName && <div className="game-card__title">{playerName}</div>}
       <div className="game-card__desc">{card.description}</div>
 
-      {scoring && (
-        <div>
-          <DifficultyBadge difficulty={card.difficulty} />
+      {(scoring || isOngoing) && (
+        <div className="game-card__badges">
+          {scoring && <DifficultyBadge difficulty={card.difficulty} />}
+          {isOngoing && (
+            <span className="duration-badge">⏱️ {card.duration ?? "Until next turn"}</span>
+          )}
         </div>
       )}
     </div>

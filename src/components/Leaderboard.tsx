@@ -1,12 +1,14 @@
-import { SCORING_TURNS_PER_PLAYER, type Player } from "../types";
+import type { Player } from "../types";
 import { finishingPositions, rankedPlayers } from "../game/scoring";
 
 export function Leaderboard({
   players,
   currentPlayerId,
+  roundsPerPlayer,
 }: {
   players: Player[];
   currentPlayerId?: string;
+  roundsPerPlayer: number;
 }) {
   const ranked = rankedPlayers(players);
   const positions = finishingPositions(players);
@@ -43,17 +45,17 @@ export function Leaderboard({
                       : "Double Points available"
                 }
               >
-                ⚡×2
+                2️⃣ x{player.doublePointsUsed ? 0 : 1}
               </span>
               <span
                 className={"lb-life" + (player.swapUsed ? " lb-life--used" : "")}
                 title={player.swapUsed ? "Swap used" : "Swap available"}
               >
-                🔄
+                🔁 x{player.swapUsed ? 0 : 1}
               </span>
             </span>
             <span className="lb-row__done">
-              {player.scoringTurnsCompleted}/{SCORING_TURNS_PER_PLAYER}
+              {player.scoringTurnsCompleted}/{roundsPerPlayer}
             </span>
             <span className="lb-row__score">{player.score}</span>
           </div>

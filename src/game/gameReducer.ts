@@ -1,6 +1,6 @@
 import {
   behaviorByCategory,
-  OPPONENT_TOKEN,
+  OPPONENT_TOKEN_RE,
   SCORING_TURNS_PER_PLAYER,
   type BehaviorByCategory,
   type Card,
@@ -13,22 +13,25 @@ import { buildDeck } from "./deckBuilder";
 import { cardPoints } from "./scoring";
 
 /**
- * If a card's description references {@link OPPONENT_TOKEN}, replace it with a
- * random other player's name so the card reads naturally (e.g. "Arm wrestle
- * Jess."). Cards without the token are returned unchanged.
+ * If a card's description references the opponent token (in any of its
+ * accepted forms, e.g. "{opponent}", "{Opponent}", "{ opponent }"), replace it
+ * with a random other player's name so the card reads naturally (e.g. "Arm
+ * wrestle Jess."). Cards without the token are returned unchanged.
  */
 function resolveOpponentToken(
   card: Card,
   players: readonly Player[],
   currentIndex: number,
 ): Card {
-  if (!card.description.includes(OPPONENT_TOKEN)) return card;
+  OPPONENT_TOKEN_RE.lastIndex = 0;
+  if (!OPPONENT_TOKEN_RE.test(card.description)) return card;
   const others = players.filter((_, i) => i !== currentIndex);
   if (others.length === 0) return card;
   const opponent = others[Math.floor(Math.random() * others.length)];
+  OPPONENT_TOKEN_RE.lastIndex = 0;
   return {
     ...card,
-    description: card.description.split(OPPONENT_TOKEN).join(opponent.name),
+    description: card.description.replace(OPPONENT_TOKEN_RE, opponent.name),
   };
 }
 
@@ -54,6 +57,12 @@ export interface GameState {
   lastWinnerName: string | null;
   /** Behaviour of each category name, so the reducer knows how cards resolve. */
   behavior: BehaviorByCategory;
+  /** Scoring turns each player must complete this game (1, 3 or 5). */
+  roundsPerPlayer: number;
+  /** Full card/category library and difficulty filter, kept for CHANGE_LOCATION. */
+  cards: Card[];
+  categories: CategoryDef[];
+  difficulties: Difficulty[];
   finished: boolean;
 }
 
@@ -65,6 +74,8 @@ export interface NewGameConfig {
   cards: Card[];
   categories: CategoryDef[];
   seed?: number;
+  /** Scoring turns each player must complete (1, 3 or 5). Defaults to 5. */
+  roundsPerPlayer?: number;
 }
 
 // Chance a non-scoring interlude (Group Round or Chaos Event) shows before a
@@ -86,7 +97,8 @@ export function createGame(config: NewGameConfig): GameState {
     pendingMission: null,
   }));
 
-  const scoringNeeded = players.length * SCORING_TURNS_PER_PLAYER;
+  const roundsPerPlayer = config.roundsPerPlayer ?? SCORING_TURNS_PER_PLAYER;
+  const scoringNeeded = players.length * roundsPerPlayer;
   // Buffer covers up to one Swap per player without exhausting the deck.
   const deck = buildDeck(
     config.cards,
@@ -113,6 +125,10 @@ export function createGame(config: NewGameConfig): GameState {
     lastMissionStarted: false,
     lastWinnerName: null,
     behavior: behaviorByCategory(config.categories),
+    roundsPerPlayer,
+    cards: config.cards,
+    categories: config.categories,
+    difficulties: config.difficulties,
     finished: false,
   };
 }
@@ -127,7 +143,8 @@ export type GameAction =
   | { type: "START_MISSION" }
   | { type: "RESOLVE_MISSION"; success: boolean }
   | { type: "AWARD_MINI"; winnerId: string | null }
-  | { type: "NEXT" };
+  | { type: "NEXT" }
+  | { type: "CHANGE_LOCATION"; location: GameLocation };
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -153,9 +170,39 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return awardMini(state, action.winnerId);
     case "NEXT":
       return next(state);
+    case "CHANGE_LOCATION":
+      return changeLocation(state, action.location);
     default:
       return state;
   }
+}
+
+/**
+ * Switch location mid-game (e.g. the group heads home). Only allowed between
+ * turns; rebuilds the remaining scoring/interlude queues from the new
+ * location's card pool, keeping everyone's progress and scores intact.
+ */
+function changeLocation(state: GameState, location: GameLocation): GameState {
+  if (state.phase !== "ready" || location === state.location) return state;
+  const remaining = state.players.reduce(
+    (sum, p) => sum + Math.max(0, state.roundsPerPlayer - p.scoringTurnsCompleted),
+    0,
+  );
+  const deck = buildDeck(
+    state.cards,
+    state.categories,
+    location,
+    remaining,
+    state.players.length,
+    undefined,
+    state.difficulties,
+  );
+  return {
+    ...state,
+    location,
+    scoringQueue: deck.scoring,
+    interludeQueue: deck.interludes,
+  };
 }
 
 function updateCurrentPlayer(
@@ -352,7 +399,7 @@ function resolveMission(state: GameState, success: boolean): GameState {
   // Mid-game check-in: the player still has a turn to play, so hand it to them.
   const stillHasTurns =
     players[state.currentPlayerIndex].scoringTurnsCompleted <
-    SCORING_TURNS_PER_PLAYER;
+    state.roundsPerPlayer;
   if (stillHasTurns) {
     return {
       ...resolved,
@@ -376,14 +423,14 @@ function next(state: GameState): GameState {
 /** Move play to the next player, routing through a check-in if one is due. */
 function advance(state: GameState): GameState {
   const everyoneDone = state.players.every(
-    (p) => p.scoringTurnsCompleted >= SCORING_TURNS_PER_PLAYER,
+    (p) => p.scoringTurnsCompleted >= state.roundsPerPlayer,
   );
   if (everyoneDone) return settleOrFinish(state);
 
   let idx = state.currentPlayerIndex;
   for (let i = 0; i < state.players.length; i++) {
     idx = (idx + 1) % state.players.length;
-    if (state.players[idx].scoringTurnsCompleted < SCORING_TURNS_PER_PLAYER) {
+    if (state.players[idx].scoringTurnsCompleted < state.roundsPerPlayer) {
       break;
     }
   }

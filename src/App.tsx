@@ -53,9 +53,39 @@ export function App() {
   const [results, setResults] = useState<Results | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
+  const screenRef = useRef<Screen>(screen);
 
   useEffect(() => saveCards(cards), [cards]);
   useEffect(() => saveCategories(categories), [categories]);
+
+  useEffect(() => {
+    screenRef.current = screen;
+  }, [screen]);
+
+  // Browser back/forward support: every navigation pushes a history entry,
+  // so the hardware/gesture back button steps back one screen instead of
+  // leaving the app. Quitting mid-game via back is confirmed just like the
+  // in-game quit button.
+  useEffect(() => {
+    history.replaceState({ screen: "home" }, "");
+    const onPopState = (e: PopStateEvent) => {
+      const target = ((e.state as { screen?: Screen } | null)?.screen ?? "home");
+      if (screenRef.current === "game" && target !== "game") {
+        if (!window.confirm("Quit the game? All scores will be lost.")) {
+          history.pushState({ screen: "game" }, "");
+          return;
+        }
+      }
+      setScreen(target);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const navigate = useCallback((next: Screen) => {
+    setScreen(next);
+    history.pushState({ screen: next }, "");
+  }, []);
 
   // Editing cards or categories marks the library customised so app updates
   // won't overwrite the player's set.
@@ -79,6 +109,7 @@ export function App() {
     location: GameLocation;
     drinkMode: boolean;
     difficulties: Difficulty[];
+    roundsPerPlayer: number;
   }) => {
     // Snapshot the library so edits mid-game don't affect the deck.
     setGameConfig({
@@ -86,13 +117,16 @@ export function App() {
       cards: cards.map((c) => ({ ...c })),
       categories: categories.map((c) => ({ ...c })),
     });
-    setScreen("game");
+    navigate("game");
   };
 
-  const finishGame = useCallback((players: Player[], drinkMode: boolean) => {
-    setResults({ players, drinkMode });
-    setScreen("results");
-  }, []);
+  const finishGame = useCallback(
+    (players: Player[], drinkMode: boolean) => {
+      setResults({ players, drinkMode });
+      navigate("results");
+    },
+    [navigate],
+  );
 
   const handleReset = () => {
     if (window.confirm("Reset all cards and categories to the default set?")) {
@@ -108,17 +142,17 @@ export function App() {
       <div className="app">
         {screen === "home" && (
           <HomeScreen
-            onNewGame={() => setScreen("setup")}
-            onOpenEditor={() => setScreen("editor")}
-            onHelp={() => setScreen("help")}
-            onShowChangelog={() => setScreen("changelog")}
+            onNewGame={() => navigate("setup")}
+            onOpenEditor={() => navigate("editor")}
+            onHelp={() => navigate("help")}
+            onShowChangelog={() => navigate("changelog")}
           />
         )}
 
-        {screen === "help" && <HelpScreen onBack={() => setScreen("home")} />}
+        {screen === "help" && <HelpScreen onBack={() => navigate("home")} />}
 
         {screen === "changelog" && (
-          <ChangelogScreen onBack={() => setScreen("home")} />
+          <ChangelogScreen onBack={() => navigate("home")} />
         )}
 
         {screen === "setup" && (
@@ -126,7 +160,7 @@ export function App() {
             cards={cards}
             categories={categories}
             onStart={startGame}
-            onBack={() => setScreen("home")}
+            onBack={() => navigate("home")}
           />
         )}
 
@@ -134,7 +168,7 @@ export function App() {
           <GameScreen
             config={gameConfig}
             onFinish={finishGame}
-            onQuit={() => setScreen("home")}
+            onQuit={() => navigate("home")}
           />
         )}
 
@@ -142,8 +176,8 @@ export function App() {
           <ResultsScreen
             players={results.players}
             drinkMode={results.drinkMode}
-            onPlayAgain={() => setScreen("setup")}
-            onHome={() => setScreen("home")}
+            onPlayAgain={() => navigate("setup")}
+            onHome={() => navigate("home")}
           />
         )}
 
@@ -154,7 +188,7 @@ export function App() {
             onChange={updateCards}
             onChangeCategories={updateCategories}
             onReset={handleReset}
-            onBack={() => setScreen("home")}
+            onBack={() => navigate("home")}
             onToast={showToast}
           />
         )}

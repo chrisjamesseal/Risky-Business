@@ -4,9 +4,19 @@ import {
   CARD_LOCATIONS,
   CATEGORY_BEHAVIORS,
   DIFFICULTIES,
+  DURATIONS,
   type Card,
+  type CardLocation,
   type CategoryDef,
 } from "../types";
+
+/** Maps old location names to their current equivalents, so libraries
+ * customised before the rename keep working without losing cards. */
+const LEGACY_LOCATIONS: Record<string, CardLocation> = {
+  Home: "At Home",
+  Pub: "Pub Trip",
+  "Club/Festival": "Night Out",
+};
 
 const CARDS_KEY = "riskit.cards.v1";
 const CATEGORIES_KEY = "riskit.categories.v1";
@@ -17,7 +27,7 @@ const META_KEY = "riskit.library.meta.v1";
  * haven't customised their library will pull in the new defaults automatically
  * on the next load; customised libraries are left untouched.
  */
-export const LIBRARY_VERSION = 6;
+export const LIBRARY_VERSION = 7;
 
 interface LibraryMeta {
   version: number;
@@ -162,14 +172,20 @@ function sanitizeCard(value: unknown, validNames: Set<string>): Card | null {
   if (!description) return null;
   if (typeof v.category !== "string" || !validNames.has(v.category)) return null;
   if (!isOneOf(v.difficulty, DIFFICULTIES)) return null;
-  if (!isOneOf(v.location, CARD_LOCATIONS)) return null;
-  return {
+  const rawLocation =
+    typeof v.location === "string" && v.location in LEGACY_LOCATIONS
+      ? LEGACY_LOCATIONS[v.location]
+      : v.location;
+  if (!isOneOf(rawLocation, CARD_LOCATIONS)) return null;
+  const card: Card = {
     id: typeof v.id === "string" && v.id ? v.id : makeId(),
     description,
     category: v.category,
     difficulty: v.difficulty,
-    location: v.location,
+    location: rawLocation,
   };
+  if (isOneOf(v.duration, DURATIONS)) card.duration = v.duration;
+  return card;
 }
 
 function isOneOf<T extends readonly string[]>(

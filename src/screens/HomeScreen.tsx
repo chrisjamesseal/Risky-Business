@@ -23,13 +23,13 @@ export function HomeScreen({
         <div style={{ height: 12 }} />
 
         <Button variant="primary" large block onClick={onNewGame}>
-          ▶ New Game
+          ▶️ New Game
         </Button>
         <Button variant="secondary" block onClick={onHelp}>
-          ? How to Play
+          ❓ How to Play
         </Button>
         <Button variant="default" block onClick={onOpenEditor}>
-          ✎ Card Editor
+          ✏️ Card Editor
         </Button>
 
         <button

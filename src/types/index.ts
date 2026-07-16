@@ -19,11 +19,11 @@ export const CATEGORY_BEHAVIORS = [
 export type CategoryBehavior = (typeof CATEGORY_BEHAVIORS)[number];
 
 export const BEHAVIOR_LABEL: Record<CategoryBehavior, string> = {
-  standard: "Do it now - score or miss",
-  duel: "1v1 - only you can win the points",
-  mini: "Group game - pick the winner",
-  ongoing: "Ongoing task - checked next turn",
-  group: "Just for fun - no points",
+  standard: "Do it now: score or miss",
+  duel: "1v1: only you can win the points",
+  mini: "Group game: pick the winner",
+  ongoing: "Ongoing task: checked next turn",
+  group: "Just for fun: no points",
 };
 
 /** Categories are user-editable data, so a category name is just a string. */
@@ -67,18 +67,29 @@ export function behaviorByCategory(
 export const DIFFICULTIES = ["Easy", "Medium", "Hard"] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];
 
-export const LOCATIONS = ["Home", "Pub", "Club/Festival"] as const;
+export const LOCATIONS = ["At Home", "Pub Trip", "Night Out"] as const;
 export type GameLocation = (typeof LOCATIONS)[number];
 
 /** A card's location field also allows "All" (usable everywhere). */
-export const CARD_LOCATIONS = ["Home", "Pub", "Club/Festival", "All"] as const;
+export const CARD_LOCATIONS = ["At Home", "Pub Trip", "Night Out", "All"] as const;
 export type CardLocation = (typeof CARD_LOCATIONS)[number];
+
+export const LOCATION_ICON: Record<GameLocation, string> = {
+  "At Home": "🏠",
+  "Pub Trip": "🍺",
+  "Night Out": "🎉",
+};
 
 /**
  * Token in a card description that gets replaced with a random other
  * player's name when the card is revealed, e.g. "Arm wrestle {opponent}."
+ * Matching is whitespace- and case-tolerant (e.g. "{Opponent}", "{ opponent }").
  */
 export const OPPONENT_TOKEN = "{opponent}";
+export const OPPONENT_TOKEN_RE = /\{\s*opponent\s*\}/gi;
+
+export const DURATIONS = ["1 min", "2 min", "5 min", "Until next turn"] as const;
+export type Duration = (typeof DURATIONS)[number];
 
 export interface Card {
   id: string;
@@ -86,6 +97,8 @@ export interface Card {
   category: Category;
   difficulty: Difficulty;
   location: CardLocation;
+  /** How long a Task (ongoing behaviour) card should be kept up. */
+  duration?: Duration;
 }
 
 /** An accepted Ongoing task awaiting its check-in at the player's next turn. */
@@ -115,5 +128,12 @@ export const DIFFICULTY_POINTS: Record<Difficulty, number> = {
   Hard: 300,
 };
 
-/** Number of scoring turns each player must complete. */
+/** Default number of scoring turns each player must complete. */
 export const SCORING_TURNS_PER_PLAYER = 5;
+
+/** Rounds-per-player choices offered at setup. */
+export const ROUND_OPTIONS = [1, 3, 5] as const;
+
+/** Rough time a single card takes to play out, for the setup time estimate. */
+export const MINUTES_PER_CARD_MIN = 1;
+export const MINUTES_PER_CARD_MAX = 3;
