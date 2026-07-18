@@ -864,8 +864,12 @@ select:focus {
   padding: 6px 9px;
   cursor: pointer;
 }
-.icon-btn:active {
+.icon-btn:active:not(:disabled) {
   transform: translate(2px, 2px);
+}
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 /* Back/cancel arrows read better without a boxed background. */

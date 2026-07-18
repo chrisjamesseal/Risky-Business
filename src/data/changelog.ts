@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.3.0";
+export const APP_VERSION = "2.4.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,19 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "2.4.0",
+    title: "Editor polish & UX review",
+    changes: [
+      "Reset to Default now uses a clearer icon",
+      "Category description is now a full-size box instead of a cramped single line",
+      "Fixed the category icon field cutting off some emoji",
+      "The in-game location switcher now uses a clearer tap-to-change icon",
+      "Replaced the last plain arrows with real emoji for consistency",
+      "Setup now warns immediately in red if no cards match your location and difficulty, instead of waiting until you hit Start",
+      "Disabled buttons (like removing a player below the minimum) now actually look disabled",
+    ],
+  },
   {
     version: "2.3.0",
     title: "Longer games & editor tweaks",

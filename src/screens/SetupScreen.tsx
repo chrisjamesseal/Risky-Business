@@ -203,8 +203,13 @@ export function SetupScreen({
             </button>
           ))}
         </div>
-        <p className="muted" style={{ fontSize: 11 }}>
-          {scoringCount} card{scoringCount === 1 ? "" : "s"} in this game
+        <p
+          className="muted"
+          style={{ fontSize: 11, color: scoringCount === 0 ? "var(--red)" : undefined }}
+        >
+          {scoringCount === 0
+            ? "No cards match this location and difficulty"
+            : `${scoringCount} card${scoringCount === 1 ? "" : "s"} in this game`}
         </p>
       </div>
 
