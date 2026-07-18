@@ -61,7 +61,7 @@ export function GameScreen({
             className="loc-switch"
             onClick={() => setShowLocationPicker((v) => !v)}
           >
-            {LOCATION_ICON[state.location]} {state.location} ✏️
+            {LOCATION_ICON[state.location]} {state.location} 🔽
           </button>
         ) : (
           <span className="muted" style={{ fontSize: 11 }}>
@@ -143,7 +143,7 @@ export function GameScreen({
               block
               onClick={() => dispatch({ type: "CONTINUE_INTERLUDE" })}
             >
-              Continue →
+              Continue ➡️
             </Button>
           </div>
         )}
@@ -327,7 +327,7 @@ export function GameScreen({
               block
               onClick={() => dispatch({ type: "NEXT" })}
             >
-              {everyoneDoneAfterThis ? "🏆 See Results" : "Next Player →"}
+              {everyoneDoneAfterThis ? "🏆 See Results" : "Next Player ➡️"}
             </Button>
           </div>
         )}

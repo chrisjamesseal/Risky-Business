@@ -362,7 +362,7 @@ export function CardEditorScreen({
         </Button>
       </div>
       <Button variant="danger" block onClick={onReset}>
-        ♻️ Reset to Default
+        🔃 Reset to Default
       </Button>
       <input
         ref={fileInput}
@@ -400,6 +400,15 @@ function CategoryForm({
   const set = <K extends keyof CatDraft>(key: K, v: CatDraft[K]) =>
     setValue((prev) => ({ ...prev, [key]: v }));
 
+  const descRef = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = descRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const borders = el.offsetHeight - el.clientHeight;
+    el.style.height = `${el.scrollHeight + borders}px`;
+  }, [value.description]);
+
   return (
     <div className="screen">
       <div className="topbar">
@@ -427,7 +436,7 @@ function CategoryForm({
           id="cicon"
           type="text"
           value={value.icon}
-          maxLength={2}
+          maxLength={6}
           onChange={(e) => set("icon", e.target.value)}
         />
       </div>
@@ -450,13 +459,15 @@ function CategoryForm({
 
       <div className="field">
         <label htmlFor="cdesc">Description</label>
-        <input
+        <textarea
           id="cdesc"
-          type="text"
+          ref={descRef}
+          className="textarea--grow"
           value={value.description}
           maxLength={120}
           onChange={(e) => set("description", e.target.value)}
         />
+        <span className="field__count">{value.description.length}/120</span>
       </div>
 
       {onDelete && (
