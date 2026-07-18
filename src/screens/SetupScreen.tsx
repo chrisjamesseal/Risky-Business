@@ -176,10 +176,13 @@ export function SetupScreen({
               onClick={() => setRounds(r)}
               aria-pressed={rounds === r}
             >
-              {r} · {timeEstimate(r)}
+              {r}
             </button>
           ))}
         </div>
+        <p className="muted" style={{ fontSize: 11 }}>
+          {timeEstimate(rounds)} for this game
+        </p>
       </div>
 
       <div className="stack--sm">
