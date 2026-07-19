@@ -34,6 +34,14 @@ export const DEFAULT_CATEGORIES: CategoryDef[] = [
       "Keep a task going until your next turn, then the group checks.",
   },
   {
+    name: "Secret",
+    behavior: "ongoing",
+    icon: "🤫",
+    color: "var(--yellow)",
+    description:
+      "A secret task only you know about, checked at your next turn.",
+  },
+  {
     name: "Mini Game",
     behavior: "group",
     icon: "🕹️",

@@ -1,4 +1,4 @@
-import type { Card, Duration } from "../types";
+import type { Card } from "../types";
 
 // The starter card library. Users can edit, add, delete, import and export
 // cards from the Card Editor; this set is what a fresh install (or "Reset to
@@ -12,85 +12,61 @@ import type { Card, Duration } from "../types";
 
 export const DEFAULT_CARDS: Card[] = [
   // -------------------------------------------------------------- Truths
-  t("truth-01", "What was your honest first impression of the player to your left?", "Easy", "All"),
-  t("truth-02", "Name a song or artist you love but would be embarrassed to admit.", "Easy", "All"),
-  t("truth-03", "Read out the last thing you searched on your phone.", "Easy", "All"),
-  t("truth-04", "Read out the last thing you searched in your private browser.", "Medium", "All"),
-  t("truth-05", "Describe your worst ever date.", "Medium", "All"),
-  t("truth-06", "What's a fear you've never told anyone here?", "Medium", "All"),
-  t("truth-07", "Tell everyone about the last white lie you told.", "Medium", "All"),
-  t("truth-08", "Rank the other players by who you'd trust with your phone unlocked.", "Easy", "All"),
-  t("truth-09", "Share a small decision you still regret.", "Easy", "All"),
-  t("truth-10", "What is your biggest regret?", "Hard", "All"),
-  t("truth-11", "What's the most you've ever spent on a night out?", "Medium", "Pub Trip"),
-  t("truth-12", "Have you ever pretended to know a song at a club? Confess.", "Easy", "Night Out"),
-  t("truth-13", "What's the weirdest story about someone that you know?", "Medium", "At Home"),
-  t("truth-14", "Tell a story about a festival or gig experience.", "Easy", "All"),
-  t("truth-15", "Tell two truths and one lie. Let the group guess the lie.", "Medium", "All"),
-  t("truth-16", "What is your go to karaoke song?", "Easy", "All"),
-  t("truth-17", "Answer a brutal would you rather question from the group.", "Medium", "All"),
-
-  // -------------------------------------------------------------- Tasks
-  k("task-01", "Speak in a fake accent until your next turn.", "Medium", "All", "Next round"),
-  k("task-02", "Freeze like a statue until your next round. Your mouth can still move though.", "Hard", "All", "Next round"),
-  k("task-03", "Speak like Donald Trump until your next turn.", "Medium", "All", "Next round"),
-  k("task-04", "Wink at a player without anyone else noticing.", "Hard", "All", "Next round"),
-  k("task-05", "You are now mute until your next turn.", "Hard", "All", "Next round"),
-  k("task-06", "Talk without showing your teeth for a full round.", "Hard", "All", "1 round"),
+  c("truth-01", "Truth", "What was your honest first impression of the player to your left?", "Easy", "All"),
+  c("truth-02", "Truth", "Name a song or artist you love but would be embarrassed to admit.", "Easy", "All"),
+  c("truth-03", "Truth", "Read out the last thing you searched on your phone.", "Easy", "All"),
+  c("truth-04", "Truth", "Read out the last thing you searched on your phone... in your private browser.", "Medium", "All"),
+  c("truth-05", "Truth", "Describe your worst ever date.", "Medium", "All"),
+  c("truth-06", "Truth", "What's a fear you've never told anyone here?", "Medium", "All"),
+  c("truth-07", "Truth", "Tell everyone about the last white lie you told.", "Medium", "All"),
+  c("truth-08", "Truth", "Rank the other players by who you'd trust with your phone unlocked.", "Easy", "All"),
+  c("truth-09", "Truth", "Share a small decision you still regret.", "Easy", "All"),
+  c("truth-10", "Truth", "What is your biggest regret?", "Hard", "All"),
+  c("truth-11", "Truth", "What's the most you've ever spent on a night out?", "Medium", "Pub Trip"),
+  c("truth-12", "Truth", "Have you ever pretended to know a song at a club? Confess.", "Easy", "Night Out"),
+  c("truth-13", "Truth", "What's the weirdest story about someone that you know?", "Medium", "At Home"),
+  c("truth-14", "Truth", "Tell a story about a festival or gig experience.", "Easy", "All"),
+  c("truth-15", "Truth", "Tell two truths and one lie. Let the group guess the lie.", "Medium", "All"),
+  c("truth-16", "Truth", "What is your go-to karaoke song?", "Easy", "All"),
 
   // -------------------------------------------------------------- Dares
-  d("dare-01", "Give every player a unique compliment.", "Easy", "All"),
-  d("dare-02", "Let the player on your left send a message from your phone to anyone they want.", "Hard", "All"),
-  d("dare-03", "Let the player on your right post a photo to your story with a caption of their choice.", "Hard", "All"),
-  d("dare-04", "Do an impression of another player until someone guesses who.", "Medium", "All"),
-  d("dare-06", "Cheers with a stranger nearby.", "Hard", "Pub Trip"),
-  d("dare-07", "Bust out a 15 second dance on the spot.", "Hard", "All"),
-  d("dare-08", "Start a wave and get at least two strangers to join.", "Hard", "Night Out"),
-  d("dare-09", "Walk a runway across the room like a supermodel.", "Medium", "At Home"),
-  d("dare-10", "Do a mini trust lean into a willing player's hands.", "Hard", "All"),
-  d("dare-12", "Do your best lion roar. The cringier the better.", "Easy", "All"),
-  d("chal-06", "Rap four lines about the person to your left.", "Medium", "All"),
-  d("chal-07", "Keep a straight face while the group tries to make you laugh for 30 seconds.", "Medium", "All"),
-  d("chal-11", "Put fingers in your ears. The group thinks of a country. Guess it within 20 questions to win.", "Medium", "All"),
+  c("dare-01", "Dare", "Give every player a unique compliment.", "Easy", "All"),
+  c("dare-02", "Dare", "Let the player on your left send a message from your phone to anyone they want.", "Hard", "All"),
+  c("dare-03", "Dare", "Let the player on your right post a photo to your story with a caption of their choice.", "Hard", "All"),
+  c("dare-04", "Dare", "Do an impression of another player until someone guesses who.", "Medium", "All"),
+  c("dare-06", "Dare", "Cheers with a stranger nearby.", "Hard", "Pub Trip"),
+  c("dare-07", "Dare", "Bust out a 15 second dance on the spot.", "Hard", "All"),
+  c("dare-08", "Dare", "Start a wave and get at least two strangers to join.", "Hard", "Night Out"),
+  c("dare-09", "Dare", "Walk a runway across the room like a supermodel.", "Medium", "At Home"),
+  c("dare-10", "Dare", "Do a mini trust lean into a willing player's hands.", "Hard", "All"),
+  c("dare-11", "Dare", "Take the ugliest selfie you can and show the group.", "Medium", "All"),
+  c("dare-12", "Dare", "Do your best lion roar. The cringier the better.", "Easy", "All"),
+  c("chal-01", "Dare", `Say "Red lorry, yellow lorry" five times fast.`, "Easy", "All"),
+  c("chal-03", "Dare", "Talk without showing your teeth for one minute.", "Hard", "All"),
+  c("chal-06", "Dare", "Rap four lines about the person to your left.", "Medium", "All"),
+  c("chal-07", "Dare", "Keep a straight face while the group tries to make you laugh for 30 seconds.", "Medium", "All"),
+  c("chal-08", "Dare", `Spell "onomatopoeia" correctly out loud.`, "Medium", "All"),
+  c("chal-11", "Dare", "Cover your eyes and ears. The group thinks of a country. Guess it within 2 minutes to win.", "Medium", "All"),
 
-  // -------------------------------------------------------------- 1v1 (only the reader can score)
-  v("dare-11", `You and ${"{opponent}"} take the ugliest selfie you can and show the group.`, "Medium", "All"),
-  v("chal-02", `Hold a plank against ${"{opponent}"} to see who can hold it the longest.`, "Medium", "All"),
-  v("chal-04", `Flip and catch a beer mat against ${"{opponent}"}. First to 3 wins.`, "Medium", "Pub Trip"),
-  v("chal-10", `Do a staring contest against ${"{opponent}"}.`, "Easy", "All"),
-  v("chal-13", `Take turns with ${"{opponent}"} saying a word at the same time. Try new words until you say the same one, get it within 5 tries to win.`, "Medium", "All"),
+  // -------------------------------------------------------------- Tasks
+  c("dare-05", "Task", "You are now stuck on mute for 1 round.", "Easy", "All"),
+  c("task-01", "Task", "Speak in a fake accent until your next turn.", "Medium", "All"),
+  c("task-02", "Task", "Freeze like a statue for the next round. Your mouth can still move though if needed.", "Hard", "All"),
+  c("task-03", "Task", "Speak like Donald Trump for the next round.", "Medium", "All"),
+  c("task-04", "Task", "Wink at a player and get their attention without anyone else noticing.", "Hard", "All"),
+  c("card-mrlbn5dw-4x8zkh", "Task", `DON’T READ THIS OUT LOUD - Don’t talk after this round until your next turn. READ THIS OUT LOUD - What’s the funniest thing that’s happened to someone you know?`, "Medium", "All"),
 
-  // -------------------------------------------------------------- Group (no points, just for fun)
-  g("chal-09", "Frisbee a coaster so it lands on top of a glass at least 3 feet away. Person who does it quickest wins.", "Medium", "Pub Trip"),
-  g("mini-01", "Choose a Never Have I Ever question. Everyone reveals with hands up.", "Easy", "All"),
-  g("mini-03", "Make the longest word possible from seven random letters in 30 seconds.", "Hard", "All"),
+  // -------------------------------------------------------------- Secret
+  c("card-mrqy5dkx-7dn1ji", "Secret", "Pretend to sneeze 3 times back to back without someone questioning why.", "Medium", "All", "Next round"),
 ];
 
-// --- tiny builders to keep the list above readable --------------------------
-
-function make(
+function c(
   id: string,
   category: Card["category"],
   description: string,
   difficulty: Card["difficulty"],
   location: Card["location"],
-  duration?: Duration,
+  duration?: Card["duration"],
 ): Card {
   return { id, description, category, difficulty, location, ...(duration ? { duration } : {}) };
-}
-
-function t(id: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
-  return make(id, "Truth", description, difficulty, location);
-}
-function d(id: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
-  return make(id, "Dare", description, difficulty, location);
-}
-function v(id: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
-  return make(id, "1v1", description, difficulty, location);
-}
-function k(id: string, description: string, difficulty: Card["difficulty"], location: Card["location"], duration: Duration) {
-  return make(id, "Task", description, difficulty, location, duration);
-}
-function g(id: string, description: string, difficulty: Card["difficulty"], location: Card["location"]) {
-  return make(id, "Group", description, difficulty, location);
 }

@@ -132,10 +132,10 @@ describe("difficulty tiers", () => {
 });
 
 describe("default library", () => {
-  it("has Group cards, and they are non-scoring", () => {
+  it("Group is defined as a non-scoring category (may have zero cards)", () => {
     const rounds = DEFAULT_CARDS.filter((c) => c.category === "Group");
-    expect(rounds.length).toBeGreaterThan(0);
     expect(rounds.every((c) => !scores(c.category))).toBe(true);
+    expect(scores("Group")).toBe(false);
   });
 
   it("Mini Game is defined as a non-scoring category (may have zero cards)", () => {
@@ -150,15 +150,15 @@ describe("default library", () => {
     expect(tasks.every((c) => scores(c.category))).toBe(true);
   });
 
+  it("has Secret cards (deferred, checked at the next turn), and they score", () => {
+    const secrets = DEFAULT_CARDS.filter((c) => c.category === "Secret");
+    expect(secrets.length).toBeGreaterThan(0);
+    expect(secrets.every((c) => scores(c.category))).toBe(true);
+  });
+
   it("has no card left over without a matching category", () => {
     const names = new Set(DEFAULT_CATEGORIES.map((c) => c.name));
     expect(DEFAULT_CARDS.every((c) => names.has(c.category))).toBe(true);
-  });
-
-  it("has an {opponent}-token card for random-opponent challenges", () => {
-    expect(DEFAULT_CARDS.some((c) => c.description.includes("{opponent}"))).toBe(
-      true,
-    );
   });
 });
 
@@ -195,7 +195,6 @@ describe("buildDeck", () => {
     expect(
       deck.interludes.every((c) => c.category === "Group" || c.category === "Mini Game"),
     ).toBe(true);
-    expect(deck.interludes.length).toBeGreaterThan(0);
     expect(deck.scoring.some((c) => c.category === "Group")).toBe(false);
     // Task cards are scoring, so they belong in the scoring deck.
     expect(deck.scoring.some((c) => c.category === "Task")).toBe(true);
@@ -309,7 +308,21 @@ describe("game reducer", () => {
   });
 
   it("shows a non-scoring interlude first when roll is low", () => {
-    const state = gameReducer(createGame(config), { type: "REVEAL", roll: 0 });
+    // The default library may have zero Group/Mini Game cards, so add one to
+    // make sure an interlude is actually available to draw here.
+    const groupCard: Card = {
+      id: "group-1",
+      description: "Never have I ever...",
+      category: "Group",
+      difficulty: "Easy",
+      location: "All",
+    };
+    const withInterlude = gameConfig({
+      names: ["Ann", "Ben"],
+      cards: [...DEFAULT_CARDS, groupCard],
+      seed: 5,
+    });
+    const state = gameReducer(createGame(withInterlude), { type: "REVEAL", roll: 0 });
     expect(state.phase).toBe("interlude");
     expect(state.pendingInterlude).not.toBeNull();
     expect(scores(state.pendingInterlude!.category)).toBe(false);
@@ -620,6 +633,33 @@ describe("Task cards (Ongoing behaviour, deferred to next turn)", () => {
   });
 });
 
+describe("Secret cards (also Ongoing behaviour)", () => {
+  it("has default Secret cards using the ongoing behaviour", () => {
+    expect(scores("Secret")).toBe(true);
+    expect(BEHAVIOR["Secret"]).toBe("ongoing");
+    const secrets = DEFAULT_CARDS.filter((c) => c.category === "Secret");
+    expect(secrets.length).toBeGreaterThan(0);
+  });
+
+  it("defers points just like a Task card", () => {
+    const card: Card = {
+      id: "secret-1",
+      description: "Do something sneaky.",
+      category: "Secret",
+      difficulty: "Medium",
+      location: "All",
+      duration: "Next round",
+    };
+    const cfg = gameConfig({ cards: [card], seed: 2 });
+    let state = createGame(cfg);
+    state = gameReducer(state, { type: "REVEAL", roll: 0.9 });
+    expect(state.currentCard?.category).toBe("Secret");
+    state = gameReducer(state, { type: "START_MISSION" });
+    expect(state.lastMissionStarted).toBe(true);
+    expect(state.players[0].pendingMission?.points).toBe(200);
+  });
+});
+
 describe("1v1 cards (duel behaviour - only the reader can score)", () => {
   const duelCard: Card = {
     id: "d1",
@@ -629,10 +669,10 @@ describe("1v1 cards (duel behaviour - only the reader can score)", () => {
     location: "All",
   };
 
-  it("has default 1v1 cards, and they are scoring", () => {
+  it("1v1 is defined as a scoring category (may have zero default cards)", () => {
     const duels = DEFAULT_CARDS.filter((c) => c.category === "1v1");
-    expect(duels.length).toBeGreaterThan(0);
     expect(duels.every((c) => scores(c.category))).toBe(true);
+    expect(scores("1v1")).toBe(true);
   });
 
   it("no longer has a Challenge category - 1v1 replaced it", () => {
