@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.4.0";
+export const APP_VERSION = "2.5.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "2.5.0",
+    title: "Card sync & rounds tweak",
+    changes: [
+      "Synced the default card library with the latest set: refreshed Truth/Dare/Task wording, new Secret category for covert tasks",
+      "1v1 and Group now ship with zero default cards for now; add your own any time in the Card Editor",
+      "Rounds chips now just show the number; the time estimate is a single summary line below",
+    ],
+  },
   {
     version: "2.4.0",
     title: "Editor polish & UX review",
