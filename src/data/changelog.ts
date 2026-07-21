@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.5.0";
+export const APP_VERSION = "2.6.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "2.6.0",
+    title: "A real app icon",
+    changes: [
+      "Added a proper app icon and favicon: a pixel-block R in the homepage logo's pink/cyan/black style on a dark background",
+      "Added an apple-touch-icon and web app manifest so Risk It can be added to your home screen with the new icon",
+    ],
+  },
   {
     version: "2.5.0",
     title: "Card sync & rounds tweak",

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#170a2e" />
+      <stop offset="100%" stop-color="#0d0221" />
+    </radialGradient>
+    <symbol id="r-glyph" viewBox="0 0 180 252">
+      <!-- Blocky pixel "R" on a 5x7 grid of 36px cells. -->
+      <g fill="currentColor">
+        <rect x="0" y="0" width="36" height="36" />
+        <rect x="36" y="0" width="36" height="36" />
+        <rect x="72" y="0" width="36" height="36" />
+        <rect x="108" y="0" width="36" height="36" />
+
+        <rect x="0" y="36" width="36" height="36" />
+        <rect x="144" y="36" width="36" height="36" />
+
+        <rect x="0" y="72" width="36" height="36" />
+        <rect x="144" y="72" width="36" height="36" />
+
+        <rect x="0" y="108" width="36" height="36" />
+        <rect x="36" y="108" width="36" height="36" />
+        <rect x="72" y="108" width="36" height="36" />
+        <rect x="108" y="108" width="36" height="36" />
+
+        <rect x="0" y="144" width="36" height="36" />
+        <rect x="72" y="144" width="36" height="36" />
+
+        <rect x="0" y="180" width="36" height="36" />
+        <rect x="108" y="180" width="36" height="36" />
+
+        <rect x="0" y="216" width="36" height="36" />
+        <rect x="144" y="216" width="36" height="36" />
+      </g>
+    </symbol>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)" />
+
+  <rect x="26" y="26" width="460" height="460" rx="28" fill="none"
+        stroke="#0a0118" stroke-width="20" />
+
+  <use href="#r-glyph" x="182" y="146" width="180" height="252" color="#0a0118" />
+  <use href="#r-glyph" x="166" y="130" width="180" height="252" color="#05d9e8" />
+  <use href="#r-glyph" x="150" y="114" width="180" height="252" color="#ff2e88" />
+</svg>
