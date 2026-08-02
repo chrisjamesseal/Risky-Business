@@ -163,6 +163,7 @@ export function GameScreen({
               </Button>
               <Button
                 variant="danger"
+                large
                 onClick={() => dispatch({ type: "FAIL" })}
               >
                 ❌ Skip · 0

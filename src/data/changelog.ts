@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.6.0";
+export const APP_VERSION = "2.7.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 
 // Newest first. Shown on the Changelog screen (reached by tapping the version).
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "2.7.0",
+    title: "100 new cards",
+    changes: [
+      "Added 100 new cards: 25 Truths, 25 Dares, 15 Tasks, 10 Secrets, and 15 new 1v1 duels and 10 Group cards to bring those categories back to life",
+      "The Skip button on Task and Secret cards is now bigger and bolder, easier to spot next to Start Task",
+    ],
+  },
   {
     version: "2.6.0",
     title: "A real app icon",
