@@ -36,7 +36,7 @@ const META_KEY = "riskit.library.meta.v1";
  * haven't customised their library will pull in the new defaults automatically
  * on the next load; customised libraries are left untouched.
  */
-export const LIBRARY_VERSION = 9;
+export const LIBRARY_VERSION = 10;
 
 interface LibraryMeta {
   version: number;
